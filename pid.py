@@ -7,7 +7,7 @@ class PIDController:
         self.lim_min = lim_min
         self.lim_max = lim_max # ?
 
-        self.intended = set_value
+        self.goal = set_value
 
         self.last_error = last_error
         self.last_measurement = last_measurement
@@ -19,7 +19,7 @@ class PIDController:
 
     def update(self, measurement, dt) -> float:
         # TODO:
-        error = self.intended - measurement
+        error = self.goal - measurement
 
         # proportional term
         proportional = self.Kp * error
@@ -64,5 +64,5 @@ class PIDController:
         
         return self.out
 
-    def update_intended(self, newint):
-        self.intended = newint
+    def setGoal(self, newint):
+        self.goal = newint

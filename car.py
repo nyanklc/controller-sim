@@ -1,15 +1,23 @@
+import math
+
+from object import Object
 from pid import PIDController
 
-class Car:
-    def __init__(self, width, height, initial_vel=0):
-        self.w = width
-        self.h = height
-        self.vel = initial_vel
+class Car(Object):
+    def __init__(self, color:tuple, size:float=50, x:float=0, y:float=0, yaw:float=0, initial_speed:float=0):
+        Object.__init__(self, shape_type="rectangle", color=color, radius=math.sqrt(2) * size / 2, x=x, y=y, yaw=yaw)
+        self.speed:float = initial_speed
 
-    def update_vel(self, dt):
-        self.vel += self.controller.update(self.vel, dt)
+    def update(self, dt):
+        dx = math.cos(self.yaw) * self.speed * dt
+        dy = math.sin(self.yaw) * self.speed * dt
+        Object.update(self, dx, dy)
+        self.speed += self.controller.update(self.speed, dt)
 
-    def set_controller(self, method, params):
+    def setSpeed(self, value):
+        self.controller.setGoal(value)
+
+    def setController(self, method, params):
         if method == 'pid':
             p = params[0]
             i = params[1]
