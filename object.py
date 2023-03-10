@@ -9,7 +9,7 @@ SHAPES = {
 }
 
 # defines a physical object.
-# should call update whenever the object moves.
+# should call update whenever the object's state changes.
 class Object:
     def __init__(self, shape_type:str, color:tuple, radius:float, x:float=0, y:float=0, yaw:float=0):
         # print(f"object init: shape_type={shape_type}, radius={radius}, x={x}, y={y}, yaw={yaw}")
@@ -28,7 +28,6 @@ class Object:
         self.footprint = transformPolygon(self.footprint, dx, dy, dyaw)
 
 def definePolygon(shape_type:int, radius:float):
-    # print(f"define polygon: shape_type={shape_type}, radius={radius}")
     polygon_points:list = []
     if shape_type == 0: # triangle
         angle = 2 * math.pi / 3
