@@ -2,7 +2,8 @@ import math
 import time
 
 import matplotlib as mpl
-mpl.use('Agg')
+# mpl.use('Agg')
+mpl.use('TkAgg')
 import matplotlib.pyplot as plt
 import pygame
 import numpy as np
@@ -71,7 +72,7 @@ if __name__ == "__main__":
     current_sim_time = 0
     clock = pygame.time.Clock()
     dt = time_step
-    
+
     # main loop
     for time_index in range(len(plot_time)):
 
@@ -113,4 +114,5 @@ if __name__ == "__main__":
     plt.xlabel("time")
     plt.grid()
     plt.legend(loc="upper right")
-    plt.savefig("../fig/vel_time.png")
+    # plt.savefig("../fig/vel_time.png")
+    plt.show()
