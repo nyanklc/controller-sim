@@ -18,7 +18,6 @@ class PIDController:
         self.out : float
 
     def update(self, measurement, dt) -> float:
-        # TODO:
         error = self.goal - measurement
 
         # proportional term
@@ -45,9 +44,9 @@ class PIDController:
             integral = lim_min_int
 
         # derivative term (bandlimited differentiator) (derivative on measurement to prevent kick)
-        # TODO: tau
-        self.tau = dt + 0.01
-        derivative = (2.0 * self.Kd * (measurement - self.last_measurement) + (2.0 * self.tau - dt) * self.differentiator) / (2.0 * self.tau * dt)
+        # TODO: tau?
+        self.tau = 0.02
+        derivative = -(2.0 * self.Kd * (measurement - self.last_measurement) + (2.0 * self.tau - dt) * self.differentiator) / (2.0 * self.tau + dt)
 
         self.out = proportional + integral + derivative
 
@@ -61,8 +60,12 @@ class PIDController:
         self.last_error = error
         self.last_measurement = measurement
         self.integrator = integral
+        self.differentiator = derivative
         
         return self.out
 
     def setGoal(self, newint):
         self.goal = newint
+
+    def getGoal(self):
+        return self.goal
