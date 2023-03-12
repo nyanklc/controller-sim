@@ -8,6 +8,7 @@ class Car(Object):
         Object.__init__(self, shape_type="rectangle", color=color, radius=math.sqrt(2) * size / 2, x=x, y=y, yaw=yaw)
         self.speed:float = initial_speed
         self.angular_speed = 0
+        self.has_orientation = True
 
     def update(self, dt):
         dx = math.cos(self.yaw) * self.speed * dt
