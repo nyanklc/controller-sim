@@ -12,22 +12,22 @@ from car import Car
 from game_window import GameWindow
 
 ######################################################################
-sim_end_time = 2.0
+sim_end_time = 10.0
 
-p = 0.2
-i = 0.1
-d = 0.0001
+p = 0.4
+i = 0.04
+d = 0.00001
 
-goal = 800.0
+goal = 100.0
 
-time_step = 0.01
+# NOTE: need to reduce derivative gain when making the time step smaller, otherwise it becomes unstable
+time_step = 0.001
 
-finish_enabled = True
+finish_enabled = False
 finish_error = 2
 finish_derivative_error = 0.01
 
 viewer_size = (640, 480)
-fps = 60
 ######################################################################
 
 def finished(speeds, goal, time_index):
@@ -56,7 +56,6 @@ def clip_plots(time_index, plot_time, plot_last_error, plot_goal, plot_vel):
 
 if __name__ == "__main__":
     car = Car(color=(255, 0, 255), x=200, y=100, yaw=math.pi/6)
-    viewer = GameWindow(viewer_size)
 
     pid_params = (p, i, d, goal) # assuming car starts with 0 velocity, otherwise also set last_measurement param
     car.setController('pid', pid_params)
@@ -70,7 +69,6 @@ if __name__ == "__main__":
     plot_vel = np.zeros(shape=(int)(sim_end_time/time_step) + 1, dtype=np.float32)
 
     current_sim_time = 0
-    clock = pygame.time.Clock()
     dt = time_step
 
     # main loop
@@ -90,17 +88,12 @@ if __name__ == "__main__":
         # update objects
         car.update(dt)
 
-        # viewer
-        viewer.draw(car)
-
         # plotting
         plot_last_error[time_index] = car.controller.last_error
         plot_goal[time_index] = goal
         plot_vel[time_index] = car.speed
 
         time_index += 1
-        clock.tick(60)
-        # time.sleep(0.001)
 
     if current_sim_time <= sim_end_time:
         print("finished because output stabilized")
