@@ -17,6 +17,12 @@ class Car(Object):
     def setSpeed(self, value):
         self.controller.setGoal(value)
 
+    def getSpeed(self):
+        return self.speed
+
+    def getSpeedGoal(self):
+        return self.controller.getGoal()
+
     def setController(self, method, params):
         if method == 'pid':
             p = params[0]

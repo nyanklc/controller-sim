@@ -2,8 +2,8 @@ import pygame
 
 from object import Object
 
-class Viewer:
-    def __init__(self, size):
+class GameWindow:
+    def __init__(self, size: tuple):
         self.size = size
 
         pygame.init()
@@ -11,7 +11,7 @@ class Viewer:
 
         # create window
         self.screen = pygame.display.set_mode([self.size[0], self.size[1]])
-        pygame.display.set_caption('controller-sim')
+        pygame.display.set_caption('sim')
         self.screen.fill(self.background_color)
         pygame.display.flip()
 
@@ -19,3 +19,6 @@ class Viewer:
         self.screen.fill(self.background_color) # clear screen
         pygame.draw.polygon(self.screen, obj.color, obj.footprint)
         pygame.display.flip()
+
+    def get_events(self):
+        return pygame.event.get()

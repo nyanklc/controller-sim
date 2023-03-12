@@ -66,3 +66,6 @@ class PIDController:
 
     def setGoal(self, newint):
         self.goal = newint
+
+    def getGoal(self):
+        return self.goal
