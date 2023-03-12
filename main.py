@@ -7,16 +7,24 @@ from car import Car
 from game_window import GameWindow
 
 meters_per_pixel = 0.01
-fps = 60
+fps = 120
 sim_step = 1 * meters_per_pixel
 
-car = Car((0,255,0), x=200, y=100, yaw=math.pi/6)
+car = Car((0,255,0), x=200, y=100, yaw=0)
+# linear speed controller
 p = 0.4
 i = 0.04
 d = 0.00001
 car_vel = 0
 pid_params = (p, i, d, car_vel)
 car.setController('pid', pid_params)
+# angular speed controller
+p = 0.4
+i = 0.04
+d = 0.00001
+car_angular_vel = 0
+pid_params = (p, i, d, car_angular_vel)
+car.setAngularController('pid', pid_params)
 
 window = GameWindow((640, 480))
 
@@ -44,7 +52,7 @@ while True:
                 car.setSpeed(car.getSpeedGoal() + 10)
             if event.key == pygame.K_DOWN:
                 car.setSpeed(car.getSpeedGoal() - 10)
-            if event.key == pygame.K_LEFT:
-                pass
             if event.key == pygame.K_RIGHT:
-                pass
+                car.setAngularSpeed(car.getAngularSpeedGoal() + 0.5)
+            if event.key == pygame.K_LEFT:
+                car.setAngularSpeed(car.getAngularSpeedGoal() - 0.5)

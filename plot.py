@@ -59,6 +59,7 @@ if __name__ == "__main__":
 
     pid_params = (p, i, d, goal) # assuming car starts with 0 velocity, otherwise also set last_measurement param
     car.setController('pid', pid_params)
+    car.setAngularController('pid', pid_params)
     car.setSpeed(goal)
 
     print("starting simulation")
