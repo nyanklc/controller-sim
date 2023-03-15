@@ -12,7 +12,7 @@ from car import Car
 from game_window import GameWindow
 
 ######################################################################
-sim_end_time = 10.0
+sim_end_time = 2.0
 
 p = 0.4
 i = 0.04
@@ -23,7 +23,7 @@ goal = 100.0
 # NOTE: need to reduce derivative gain when making the time step smaller, otherwise it becomes unstable
 time_step = 0.001
 
-finish_enabled = False
+finish_enabled = True
 finish_error = 2
 finish_derivative_error = 0.01
 
