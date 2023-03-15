@@ -3,7 +3,7 @@ import numpy as np
 import pygame
 import time
 
-from car import Car
+from car import Car, getDistance
 from game_window import GameWindow
 
 meters_per_pixel = 0.01
@@ -55,9 +55,9 @@ while True:
     prev_time = time.time()
 
     car.update(sim_step)
-    agent.update(sim_step)
+    agent.update(sim_step, (car.x - 200, car.y), car.yaw)
 
-    window.set_info_text("car speed: %.2f m/s (%.2f px/s)" % (car.getSpeed() * meters_per_pixel, car.getSpeed()), (0, 0, 0))
+    window.set_info_text("distance: %d px" % (getDistance((car.x, car.y), (agent.x, agent.y))), (0, 0, 0))
     window.draw([car, agent])
     
     events = window.get_events()
