@@ -1,4 +1,5 @@
 import pygame
+import math
 
 from object import Object
 
@@ -21,7 +22,12 @@ class GameWindow:
     def draw(self, obj_list, info_text: bool = True):
         self.screen.fill(self.background_color) # clear screen
         for obj in obj_list:
+            # draw footprint of the object
             pygame.draw.polygon(self.screen, obj.color, obj.footprint)
+            # indicate orientation
+            if obj.has_orientation == True:
+                offsetted_center = (obj.x + math.cos(obj.yaw) * obj.radius / 3, obj.y + math.sin(obj.yaw) * obj.radius / 3)
+                pygame.draw.circle(self.screen, invert_color(obj.color), offsetted_center, obj.radius / 5)
         if info_text:
             self.screen.blit(self.info_text_surface, (0, 0))
         pygame.display.flip()
@@ -35,3 +41,6 @@ class GameWindow:
     def quit(self):
         pygame.display.quit()
         pygame.quit()
+
+def invert_color(color):
+    return (255 - color[0], 255 - color[1], 255 - color[2])
