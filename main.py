@@ -10,7 +10,7 @@ meters_per_pixel = 0.01
 fps = 120
 sim_step = 1 * meters_per_pixel
 
-car = Car((0,255,0), x=200, y=100, yaw=0)
+car = Car((0,255,0), x=200, y=100, yaw=0, socket_on=True)
 # linear speed controller
 p = 0.4
 i = 0.04
@@ -51,7 +51,7 @@ while True:
     clock.tick(fps)
 
     curr_time = time.time()
-    print(f"fps: {1 / (curr_time - prev_time)}")
+    # print(f"fps: {1 / (curr_time - prev_time)}")
     prev_time = time.time()
 
     car.update(sim_step)

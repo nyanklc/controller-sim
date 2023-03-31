@@ -1,4 +1,7 @@
 import math
+import socket
+import struct
+import time
 
 from object import Object
 from pid import PIDController
@@ -23,16 +26,23 @@ def getDistance(point1, point2):
     return math.hypot(point2[1]-point1[1], point2[0]-point1[0])
 
 class Car(Object):
-    def __init__(self, color:tuple, size:float=50, x:float=0, y:float=0, yaw:float=0, initial_speed:float=0):
+    def __init__(self, color:tuple, size:float=50, x:float=0, y:float=0, yaw:float=0, initial_speed:float=0, socket_on=False):
         Object.__init__(self, shape_type="rectangle", color=color, radius=math.sqrt(2) * size / 2, x=x, y=y, yaw=yaw)
         self.speed:float = initial_speed
         self.angular_speed = 0
         self.has_orientation = True
 
+        if socket_on:
+          self.socket_on = socket_on
+          self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+          self.sock.connect(("192.168.4.1", 333))
+          self.last_send_time = time.time()
+          self.socket_output_stream = self.sock.makefile('w')
+
     def updateAutomatic(self, pos, yaw, dt):
         yaw_should_be = getAngle((self.x, self.y), pos)
-        self.angular_controller.setGoal(getAngularDifference(self.yaw, yaw_should_be) * 30)
-        self.controller.setGoal(getDistance((self.x, self.y), pos) * 30)
+        self.angular_controller.setGoal(getAngularDifference(self.yaw, yaw_should_be) * 5)
+        self.controller.setGoal(getDistance((self.x, self.y), pos) * 5)
         self.speed += self.controller.update(self.speed, dt)
         self.angular_speed += self.angular_controller.update(self.angular_speed, dt)
 
@@ -49,6 +59,16 @@ class Car(Object):
         
         self.speed += self.controller.update(self.speed, dt)
         self.angular_speed += self.angular_controller.update(self.angular_speed, dt)
+
+        if (self.socket_on):
+          meters_per_pixel = 0.01
+          data_str = '{:.2f} {:.2f}a'.format(self.speed * meters_per_pixel, self.angular_speed)
+          # if (time.time() - self.last_send_time) < 0.2:
+          #   return
+          print("sending: ", data_str)
+          self.socket_output_stream.write(data_str)
+          self.socket_output_stream.flush()
+          self.last_send_time = time.time()
 
     def setSpeed(self, value):
         self.controller.setGoal(value)
