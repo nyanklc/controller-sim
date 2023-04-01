@@ -57,7 +57,7 @@ while True:
     car.update(sim_step)
     agent.update(sim_step, (car.x - 200, car.y), car.yaw)
 
-    window.set_info_text("distance: %d px" % (getDistance((car.x, car.y), (agent.x, agent.y))), (0, 0, 0))
+    window.set_info_text("car speed: %.2f m/s (%.2f px/s)" % (car.getSpeed() * meters_per_pixel, car.getSpeed()), (0, 0, 0))
     window.draw([car, agent])
     
     events = window.get_events()
