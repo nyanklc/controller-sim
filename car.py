@@ -32,6 +32,8 @@ class Car(Object):
         self.angular_speed = 0
         self.has_orientation = True
 
+        self.socket_on = socket_on
+
         if socket_on:
           self.socket_on = socket_on
           self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
