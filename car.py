@@ -40,6 +40,7 @@ class Car(Object):
           self.sock.connect(("192.168.4.1", 333))
           self.last_send_time = time.time()
           self.socket_output_stream = self.sock.makefile('w')
+          self.socket_input_stream = self.sock.makefile('r')
 
     def updateAutomatic(self, pos, yaw, dt):
         yaw_should_be = getAngle((self.x, self.y), pos)
@@ -58,7 +59,7 @@ class Car(Object):
         if goal_position is not None and goal_yaw is not None:
             self.updateAutomatic(goal_position, goal_yaw, dt)
             return
-        
+
         self.speed += self.controller.update(self.speed, dt)
         self.angular_speed += self.angular_controller.update(self.angular_speed, dt)
 
@@ -72,6 +73,23 @@ class Car(Object):
           self.socket_output_stream.flush()
           self.last_send_time = time.time()
 
+    def receive(self):
+        self.message = self.sock.recv(8)
+        if not self.message:
+            print("no message received")
+            return
+        x = struct.unpack('f', bytes(self.message[0:4]))[0]
+        y = struct.unpack('f', bytes(self.message[4:]))[0]
+
+        print(f"received {str(self.message)}")
+        print(f"received x: {x}")
+        print(f"received y: {y}")
+
+        return (x, y)
+
+    def updateRemote(self, received_dx, received_dy, received_dyaw):
+        Object.update(self, received_dx, received_dy, received_dyaw)
+
     def setSpeed(self, value):
         self.controller.setGoal(value)
 
@@ -80,13 +98,13 @@ class Car(Object):
 
     def getSpeed(self):
         return self.speed
-    
+
     def getAngularSpeed(self):
         return self.angular_speed
 
     def getSpeedGoal(self):
         return self.controller.getGoal()
-    
+
     def getAngularSpeedGoal(self):
         return self.angular_controller.getGoal()
 

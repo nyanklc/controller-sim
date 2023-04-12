@@ -6,41 +6,18 @@ import time
 from car import Car, getDistance
 from game_window import GameWindow
 
+def calculateYaw(x1, x2, y1, y2):
+    return math.atan2(y1 - y2, x1 - x2)
+
+
 meters_per_pixel = 0.01
 fps = 120
 sim_step = 1 * meters_per_pixel
 
-car = Car((0,255,0), x=200, y=100, yaw=0, socket_on=True)
-# linear speed controller
-p = 0.4
-i = 0.04
-d = 0.00001
-car_vel = 0
-pid_params = (p, i, d, car_vel)
-car.setController('pid', pid_params)
-# angular speed controller
-p = 0.4
-i = 0.04
-d = 0.00001
-car_angular_vel = 0
-pid_params = (p, i, d, car_angular_vel)
-car.setAngularController('pid', pid_params)
+car = Car((0,255,0), x=320, y=240, yaw=0, socket_on=True)
 
-agent = Car((255,0,0), x=400, y=400, yaw=1)
-# linear speed controller
-p = 0.4
-i = 0.04
-d = 0.00001
-car_vel = 0
-pid_params = (p, i, d, car_vel)
-agent.setController('pid', pid_params)
-# angular speed controller
-p = 0.4
-i = 0.04
-d = 0.00001
-car_angular_vel = 0
-pid_params = (p, i, d, car_angular_vel)
-agent.setAngularController('pid', pid_params)
+prev_x = car.x
+prev_y = car.y
 
 window = GameWindow((640, 480))
 
@@ -54,34 +31,19 @@ while True:
     # print(f"fps: {1 / (curr_time - prev_time)}")
     prev_time = time.time()
 
-    car.update(sim_step)
-    agent.update(sim_step, (car.x - 200, car.y), car.yaw)
-
     window.set_info_text("car speed: %.2f m/s (%.2f px/s)" % (car.getSpeed() * meters_per_pixel, car.getSpeed()), (0, 0, 0))
-    window.draw([car, agent])
-    
-    events = window.get_events()
-    for event in events:
-        if event.type == pygame.QUIT:
-            window.quit()
-            quit()
+    window.draw([car])
 
-        if event.type == pygame.KEYDOWN:
-            # car
-            if event.key == pygame.K_UP:
-                car.setSpeed(car.getSpeedGoal() + 10)
-            if event.key == pygame.K_DOWN:
-                car.setSpeed(car.getSpeedGoal() - 10)
-            if event.key == pygame.K_RIGHT:
-                car.setAngularSpeed(car.getAngularSpeedGoal() + 0.5)
-            if event.key == pygame.K_LEFT:
-                car.setAngularSpeed(car.getAngularSpeedGoal() - 0.5)
-            # agent
-            if event.key == pygame.K_w:
-                agent.setSpeed(agent.getSpeedGoal() + 10)
-            if event.key == pygame.K_s:
-                agent.setSpeed(agent.getSpeedGoal() - 10)
-            if event.key == pygame.K_d:
-                agent.setAngularSpeed(agent.getAngularSpeedGoal() + 0.5)
-            if event.key == pygame.K_a:
-                agent.setAngularSpeed(agent.getAngularSpeedGoal() - 0.5)
+    curr_x, curr_y = car.receive()
+    # curr_x *= 3
+    # curr_y *= 3
+
+    curr_x += 640/2
+    curr_y += 480/2
+
+    dyaw = calculateYaw(curr_x, prev_x, curr_y, prev_y)
+    dx = curr_x - prev_x
+    dy = curr_y - prev_y
+    car.updateRemote(dx, dy, dyaw)
+    prev_x = curr_x
+    prev_y = curr_y
