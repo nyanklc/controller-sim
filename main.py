@@ -6,41 +6,76 @@ import time
 from car import Car, getDistance
 from game_window import GameWindow
 
+
+# path = [(200, y) for y in range(200, 301)]
+# path += [(x, 300) for x in range(201, 301)]
+
+path =[(466,31),
+    (448,28),
+    (429,25),
+    (411,24),
+    (391,22),
+    (372,23),
+    (351,23),
+    (330,25),
+    (309,27),
+    (289,31),
+    (271,36),
+    (253,44),
+    (240,52),
+    (229,62),
+    (223,72),
+    (221,83),
+    (224,95),
+    (232,108),
+    (243,122),
+    (260,136),
+    (278,151),
+    (302,167),
+    (323,183),
+    (351,201),
+    (371,217),
+    (396,236),
+    (410,251),
+    (426,270),
+    (430,283),
+    (435,299),
+    (426,311),
+    (417,323),
+    (396,331),
+    (376,339),
+    (345,343),
+    (317,347),
+    (281,349),
+    (249,350),
+    (212,350),
+    (177,350),
+    ]
+
+print(path)
+
+goal_radius = 50
+
+
 meters_per_pixel = 0.01
 fps = 120
 sim_step = 1 * meters_per_pixel
 
-car = Car((0,255,0), x=200, y=100, yaw=0)
+master = Car((0,255,0), x=480, y=31, yaw=math.pi, goal_rad=goal_radius)
 # linear speed controller
 p = 0.4
 i = 0.04
 d = 0.00001
 car_vel = 0
 pid_params = (p, i, d, car_vel)
-car.setController('pid', pid_params)
+master.setController('pid', pid_params)
 # angular speed controller
 p = 0.4
 i = 0.04
 d = 0.00001
 car_angular_vel = 0
 pid_params = (p, i, d, car_angular_vel)
-car.setAngularController('pid', pid_params)
-
-agent = Car((255,0,0), x=400, y=400, yaw=1)
-# linear speed controller
-p = 0.4
-i = 0.04
-d = 0.00001
-car_vel = 0
-pid_params = (p, i, d, car_vel)
-agent.setController('pid', pid_params)
-# angular speed controller
-p = 0.4
-i = 0.04
-d = 0.00001
-car_angular_vel = 0
-pid_params = (p, i, d, car_angular_vel)
-agent.setAngularController('pid', pid_params)
+master.setAngularController('pid', pid_params)
 
 window = GameWindow((640, 480))
 
@@ -50,38 +85,13 @@ prev_time = curr_time
 while True:
     clock.tick(fps)
 
-    curr_time = time.time()
-    print(f"fps: {1 / (curr_time - prev_time)}")
-    prev_time = time.time()
+    master.get_goal(path)
 
-    car.update(sim_step)
-    agent.update(sim_step, (car.x - 200, car.y), car.yaw)
+    master.calculate_goal_yaw(path)
 
-    window.set_info_text("distance: %d px" % (getDistance((car.x, car.y), (agent.x, agent.y))), (0, 0, 0))
-    window.draw([car, agent])
-    
-    events = window.get_events()
-    for event in events:
-        if event.type == pygame.QUIT:
-            window.quit()
-            quit()
+    master.update(sim_step, (path[master.goal_index][0], path[master.goal_index][1]), master.goal_yaw)
 
-        if event.type == pygame.KEYDOWN:
-            # car
-            if event.key == pygame.K_UP:
-                car.setSpeed(car.getSpeedGoal() + 10)
-            if event.key == pygame.K_DOWN:
-                car.setSpeed(car.getSpeedGoal() - 10)
-            if event.key == pygame.K_RIGHT:
-                car.setAngularSpeed(car.getAngularSpeedGoal() + 0.5)
-            if event.key == pygame.K_LEFT:
-                car.setAngularSpeed(car.getAngularSpeedGoal() - 0.5)
-            # agent
-            if event.key == pygame.K_w:
-                agent.setSpeed(agent.getSpeedGoal() + 10)
-            if event.key == pygame.K_s:
-                agent.setSpeed(agent.getSpeedGoal() - 10)
-            if event.key == pygame.K_d:
-                agent.setAngularSpeed(agent.getAngularSpeedGoal() + 0.5)
-            if event.key == pygame.K_a:
-                agent.setAngularSpeed(agent.getAngularSpeedGoal() - 0.5)
+    master.print_speeds()
+
+    window.set_info_text("ALSJDKLAJSDLK", (255, 0, 0))
+    window.draw([master], path)

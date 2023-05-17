@@ -61,7 +61,7 @@ class PIDController:
         self.last_measurement = measurement
         self.integrator = integral
         self.differentiator = derivative
-        
+
         return self.out
 
     def setGoal(self, newint):

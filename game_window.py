@@ -19,8 +19,9 @@ class GameWindow:
         self.screen.fill(self.background_color)
         pygame.display.flip()
 
-    def draw(self, obj_list, info_text: bool = True):
+    def draw(self, obj_list, path, info_text: bool = True):
         self.screen.fill(self.background_color) # clear screen
+        self.draw_path(path)
         for obj in obj_list:
             # draw footprint of the object
             pygame.draw.polygon(self.screen, obj.color, obj.footprint)
@@ -31,6 +32,10 @@ class GameWindow:
         if info_text:
             self.screen.blit(self.info_text_surface, (0, 0))
         pygame.display.flip()
+
+    def draw_path(self, path):
+        for i in range(len(path) - 1):
+            pygame.draw.line(self.screen, (255, 0, 0), path[i], path[i+1], 3)
 
     def get_events(self):
         return pygame.event.get()

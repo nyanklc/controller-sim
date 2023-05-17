@@ -23,16 +23,18 @@ def getDistance(point1, point2):
     return math.hypot(point2[1]-point1[1], point2[0]-point1[0])
 
 class Car(Object):
-    def __init__(self, color:tuple, size:float=50, x:float=0, y:float=0, yaw:float=0, initial_speed:float=0):
+    def __init__(self, color:tuple, goal_rad:float, size:float=50, x:float=0, y:float=0, yaw:float=0, initial_speed:float=0):
         Object.__init__(self, shape_type="rectangle", color=color, radius=math.sqrt(2) * size / 2, x=x, y=y, yaw=yaw)
         self.speed:float = initial_speed
         self.angular_speed = 0
         self.has_orientation = True
+        self.goal_radius = goal_rad
+        self.goal_index = 0
 
     def updateAutomatic(self, pos, yaw, dt):
         yaw_should_be = getAngle((self.x, self.y), pos)
-        self.angular_controller.setGoal(getAngularDifference(self.yaw, yaw_should_be) * 30)
-        self.controller.setGoal(getDistance((self.x, self.y), pos) * 30)
+        self.angular_controller.setGoal(getAngularDifference(self.yaw, yaw_should_be))
+        self.controller.setGoal(getDistance((self.x, self.y), pos))
         self.speed += self.controller.update(self.speed, dt)
         self.angular_speed += self.angular_controller.update(self.angular_speed, dt)
 
@@ -46,9 +48,20 @@ class Car(Object):
         if goal_position is not None and goal_yaw is not None:
             self.updateAutomatic(goal_position, goal_yaw, dt)
             return
-        
+
         self.speed += self.controller.update(self.speed, dt)
         self.angular_speed += self.angular_controller.update(self.angular_speed, dt)
+
+    def get_goal(self, path):
+        max_dist_index = None
+        max_dist = 0
+        for i in range(self.goal_index, len(path)):
+            dist = getDistance((self.x, self.y), (path[i][0], path[i][1]))
+            if  dist < self.goal_radius and dist > max_dist:
+                self.goal_index = i
+
+    def calculate_goal_yaw(self, path):
+        self.goal_yaw = getAngle((self.x, self.y), (path[self.goal_index][0], path[self.goal_index][1]))
 
     def setSpeed(self, value):
         self.controller.setGoal(value)
@@ -56,15 +69,19 @@ class Car(Object):
     def setAngularSpeed(self, value):
         self.angular_controller.setGoal(value)
 
+    def print_speeds(self):
+        print(f"linear: {self.speed}")
+        print(f"angular: {self.angular_speed}")
+
     def getSpeed(self):
         return self.speed
-    
+
     def getAngularSpeed(self):
         return self.angular_speed
 
     def getSpeedGoal(self):
         return self.controller.getGoal()
-    
+
     def getAngularSpeedGoal(self):
         return self.angular_controller.getGoal()
 
