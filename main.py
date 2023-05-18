@@ -82,7 +82,16 @@ window = GameWindow((640, 480))
 clock = pygame.time.Clock()
 curr_time = time.time()
 prev_time = curr_time
+
+tim = 0
+iteration_count = 0
+time_arr = []
+lin_speed_arr = []
+ang_speed_arr = []
+sample_period = 40
 while True:
+    iteration_count += 1
+
     clock.tick(fps)
 
     master.get_goal(path)
@@ -93,5 +102,22 @@ while True:
 
     master.print_speeds()
 
+    # record values
+    tim += clock.get_time()
+    if iteration_count % sample_period == 0:
+        time_arr.append(tim)
+        lin_speed_arr.append(master.speed * meters_per_pixel)
+        ang_speed_arr.append(master.angular_speed)
+
     window.set_info_text("ALSJDKLAJSDLK", (255, 0, 0))
     window.draw([master], path)
+
+    if master.goal_index == len(path) - 1:
+        break
+time_arr_np = np.array(time_arr)
+lin_speed_arr_np = np.array(lin_speed_arr)
+ang_speed_arr_np = np.array(ang_speed_arr)
+
+np.save("./time_arr.npy", time_arr_np)
+np.save("./lin_speed_arr.npy", lin_speed_arr_np)
+np.save("./ang_speed_arr.npy", ang_speed_arr_np)
