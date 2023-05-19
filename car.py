@@ -23,7 +23,7 @@ def getDistance(point1, point2):
     return math.hypot(point2[1]-point1[1], point2[0]-point1[0])
 
 class Car(Object):
-    def __init__(self, color:tuple, goal_rad:float, size:float=50, x:float=0, y:float=0, yaw:float=0, initial_speed:float=0):
+    def __init__(self, color:tuple, goal_rad:float=0, size:float=50, x:float=0, y:float=0, yaw:float=0, initial_speed:float=0):
         Object.__init__(self, shape_type="rectangle", color=color, radius=math.sqrt(2) * size / 2, x=x, y=y, yaw=yaw)
         self.speed:float = initial_speed
         self.angular_speed = 0

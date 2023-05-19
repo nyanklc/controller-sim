@@ -25,6 +25,11 @@ class GameWindow:
         for obj in obj_list:
             # draw footprint of the object
             pygame.draw.polygon(self.screen, obj.color, obj.footprint)
+            # draw goal radius if master
+            if obj.goal_radius is not 0:
+                pygame.draw.circle(self.screen, (255-obj.color[0], 255-obj.color[1], 255-obj.color[2]), (obj.x, obj.y), obj.goal_radius, width=3)
+                # also draw goal point on path
+                pygame.draw.circle(self.screen, (255-obj.color[0], 255-obj.color[1], 255-obj.color[2]), (path[obj.goal_index][0], path[obj.goal_index][1]), 8)
             # indicate orientation
             if obj.has_orientation == True:
                 offsetted_center = (obj.x + math.cos(obj.yaw) * obj.radius / 3, obj.y + math.sin(obj.yaw) * obj.radius / 3)
@@ -35,6 +40,7 @@ class GameWindow:
 
     def draw_path(self, path):
         for i in range(len(path) - 1):
+            pygame.draw.circle(self.screen, (0, 0, 255), (path[i][0], path[i][1]), 4)
             pygame.draw.line(self.screen, (255, 0, 0), path[i], path[i+1], 3)
 
     def get_events(self):
