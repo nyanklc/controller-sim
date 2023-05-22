@@ -37,7 +37,8 @@ class Car(Object):
                  ang_mult=1,
                  turn_limit_change_amount_linear=0.1,
                  turn_limit_change_amount_angular=0.1,
-                 mpp=0.01):
+                 mpp=0.01,
+                 camera_track=False):
 
         Object.__init__(self, shape_type="rectangle", color=color, radius=math.sqrt(2) * size / 2, x=x, y=y, yaw=yaw)
         self.speed:float = initial_speed
@@ -56,6 +57,8 @@ class Car(Object):
         self.turn_limit_change_amount_angular = turn_limit_change_amount_angular
 
         self.meters_per_pixel = mpp
+
+        self.camera_track = camera_track
 
     def updateAutomatic(self, pos, yaw, dt):
         LIN_LIM_MAX = self.LIN_LIM_MAX

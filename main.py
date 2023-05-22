@@ -76,7 +76,19 @@ path =[
 
 path = [(x[0], 2*x[1]) for x in path]
 
-master = Car((0,255,0), x=466, y=2*31, yaw=math.pi, goal_rad=goal_radius, lin_max=master_linear_speed_limit, ang_max=master_angular_speed_limit, lin_mult=master_linear_control_multiplier, ang_mult=master_angular_control_multiplier, turn_limit_change_amount_linear=master_turn_limit_change_amount_linear, turn_limit_change_amount_angular=master_turn_limit_change_amount_angular, mpp=meters_per_pixel)
+master = Car((0,255,0),
+             x=466,
+             y=2*31,
+             yaw=math.pi,
+             goal_rad=goal_radius,
+             lin_max=master_linear_speed_limit,
+             ang_max=master_angular_speed_limit,
+             lin_mult=master_linear_control_multiplier,
+             ang_mult=master_angular_control_multiplier,
+             turn_limit_change_amount_linear=master_turn_limit_change_amount_linear,
+             turn_limit_change_amount_angular=master_turn_limit_change_amount_angular,
+             mpp=meters_per_pixel,
+             camera_track=True)
 # linear speed controller
 p = 0.04
 i = 0.004
