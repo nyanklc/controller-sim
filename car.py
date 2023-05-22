@@ -105,16 +105,6 @@ class Car(Object):
         self.speed += self.controller.update(self.speed, dt)
         self.angular_speed += self.angular_controller.update(self.angular_speed, dt)
 
-        if self.speed > LIN_LIM_MAX:
-            self.speed = LIN_LIM_MAX
-        elif self.speed < -LIN_LIM_MAX:
-            self.speed = -LIN_LIM_MAX
-
-        if self.angular_speed > ANG_LIM_MAX:
-            self.angular_speed = ANG_LIM_MAX
-        elif self.angular_speed < -ANG_LIM_MAX:
-            self.angular_speed = -ANG_LIM_MAX
-
     def get_goal(self, path):
         max_dist_index = None
         max_dist = 0
