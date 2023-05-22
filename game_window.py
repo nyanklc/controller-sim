@@ -19,7 +19,7 @@ class GameWindow:
         self.screen.fill(self.background_color)
         pygame.display.flip()
 
-    def draw(self, obj_list, path, info_text: bool = True):
+    def draw(self, obj_list, path, info_text: bool = False):
         self.screen.fill(self.background_color) # clear screen
         self.draw_path(path)
         for obj in obj_list:
