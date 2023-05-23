@@ -149,8 +149,8 @@ while True:
     if master.goal_index == len(path) - 1:
         break
 time_arr_np = np.array(time_arr)
-lin_speed_arr_np = np.array([meters_per_pixel*x for x in lin_speed_arr])
-ang_speed_arr_np = np.array([meters_per_pixel*x for x in ang_speed_arr])
+lin_speed_arr_np = np.array(lin_speed_arr)
+ang_speed_arr_np = np.array(ang_speed_arr)
 
 print(f"lin: {lin_speed_arr}")
 print(f"lin_length: {len(lin_speed_arr)}\n")

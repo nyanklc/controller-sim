@@ -23,19 +23,19 @@ def convert_to_step_counts(lin, ang):
         left.append(lin_speed_arr[i] + ang_speed_arr[i] * 15 / 200)  # m/s
         right.append(lin_speed_arr[i] - ang_speed_arr[i] * 15 / 200)  # m/s
 
-    # print("after vel")
-    # print(f"time: {time_arr}")
-    # print(f"printing left: {left}")
-    # print(f"printing right: {right}")
+    print("after vel")
+    print(f"time: {time_arr}")
+    print(f"printing left: {left}")
+    print(f"printing right: {right}")
 
     # convert to distance
     for i in range(len(time_arr) - 1):
-        left[i] *= time_arr[i] / 1000  # m
-        right[i] *= time_arr[i] / 1000  # m
+        left[i] *= (time_arr[i+1] - time_arr[i]) / 1000  # m
+        right[i] *= (time_arr[i+1] - time_arr[i]) / 1000  # m
 
-    # print("after dist")
-    # print(f"printing left: {left}")
-    # print(f"printing right: {right}")
+    print("after dist")
+    print(f"printing left: {left}")
+    print(f"printing right: {right}")
 
     # convert to step count
     for i in range(len(time_arr) - 1):
@@ -48,10 +48,10 @@ l, r = convert_to_step_counts(lin_speed_arr, ang_speed_arr)
 l = [int(x) for x in l]
 r = [int(x) for x in r]
 
-print("\n\n\n\n\n\n STEP COUNTS:")
-print(f"printing linear: {lin_speed_arr}")
-print(f"printing angular: {ang_speed_arr}")
-print(f"time array: {time_arr}")
+# print("\n\n\n\n\n\n STEP COUNTS:")
+# print(f"printing linear: {lin_speed_arr}")
+# print(f"printing angular: {ang_speed_arr}")
+# print(f"time array: {time_arr}")
 
 print("\n\n\n\n\n\n STEP COUNTS:")
 print(f"printing left: {l}")
