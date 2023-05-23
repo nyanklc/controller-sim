@@ -7,11 +7,14 @@ from car import Car, getDistance
 from game_window import GameWindow
 
 ####################################################
-meters_per_pixel = 0.005
+meters_per_pixel = 0.01
 sim_step = 0.01  # seconds
-sample_frequency = 10  # Hz
+sample_frequency = 5  # Hz
 
 goal_radius =  0.4 # m
+goal_index_range = 5
+
+end_sim_distance = 0.1 # m
 
 master_linear_speed_limit = 0.2  # m/s
 master_angular_speed_limit = 0.2  # rad/s
@@ -27,59 +30,65 @@ master_turn_limit_change_amount_angular = 0.1  # rad/s
 goal_radius /= meters_per_pixel
 master_linear_speed_limit /= meters_per_pixel
 master_turn_limit_change_amount_linear /= meters_per_pixel
+end_sim_distance /= meters_per_pixel
+
+path = [(x, -x) for x in range(0, 141, 1)]
+path += [(x, -141) for x in range(140, -141, -1)]
+path += [(x, x) for x in range(-140, 141, 1)]
+path += [(x, 141) for x in range(140, -141, -1)]
+path += [(-x, x) for x in range(140, 0, -1)]
 
 # path = [(200, y) for y in range(200, 3001, 30)]
 # path += [(x, 3000) for x in range(201, 6001, 30)]
-
-path =[
-    (466, 31),
-    (448, 28),
-    (429, 25),
-    (411, 24),
-    (391, 22),
-    (372, 23),
-    (351, 23),
-    (330, 25),
-    (309, 27),
-    (289, 31),
-    (271, 36),
-    (253, 44),
-    (240, 52),
-    (229, 62),
-    (223, 72),
-    (221, 83),
-    (224, 95),
-    (232, 108),
-    (243, 122),
-    (260, 136),
-    (278, 151),
-    (302, 167),
-    (323, 183),
-    (351, 201),
-    (371, 217),
-    (396, 236),
-    (410, 251),
-    (426, 270),
-    (430, 283),
-    (435, 299),
-    (426, 311),
-    (417, 323),
-    (396, 331),
-    (376, 339),
-    (345, 343),
-    (317, 347),
-    (281, 349),
-    (249, 350),
-    (212, 350),
-    (177, 350),
-    ]
-
-path = [(x[0], 2*x[1]) for x in path]
+# 'S' shape
+# path =[
+#     (466, 31),
+#     (448, 28),
+#     (429, 25),
+#     (411, 24),
+#     (391, 22),
+#     (372, 23),
+#     (351, 23),
+#     (330, 25),
+#     (309, 27),
+#     (289, 31),
+#     (271, 36),
+#     (253, 44),
+#     (240, 52),
+#     (229, 62),
+#     (223, 72),
+#     (221, 83),
+#     (224, 95),
+#     (232, 108),
+#     (243, 122),
+#     (260, 136),
+#     (278, 151),
+#     (302, 167),
+#     (323, 183),
+#     (351, 201),
+#     (371, 217),
+#     (396, 236),
+#     (410, 251),
+#     (426, 270),
+#     (430, 283),
+#     (435, 299),
+#     (426, 311),
+#     (417, 323),
+#     (396, 331),
+#     (376, 339),
+#     (345, 343),
+#     (317, 347),
+#     (281, 349),
+#     (249, 350),
+#     (212, 350),
+#     (177, 350),
+#     ]
+# path = [(x[0], 2*x[1]) for x in path]
 
 master = Car((0,255,0),
-             x=466,
-             y=2*31,
-             yaw=math.pi,
+             x=0,
+             y=0,
+             yaw=-math.pi/4,
              goal_rad=goal_radius,
              lin_max=master_linear_speed_limit,
              ang_max=master_angular_speed_limit,
@@ -88,7 +97,8 @@ master = Car((0,255,0),
              turn_limit_change_amount_linear=master_turn_limit_change_amount_linear,
              turn_limit_change_amount_angular=master_turn_limit_change_amount_angular,
              mpp=meters_per_pixel,
-             camera_track=True)
+             camera_track=True,
+             goal_index_range=goal_index_range)
 # linear speed controller
 p = 0.04
 i = 0.004
@@ -147,10 +157,13 @@ while True:
     window.draw([master], path)
 
     if master.goal_index == len(path) - 1:
-        break
+        if getDistance((master.x, master.y), path[master.goal_index]) < end_sim_distance:
+            break
 time_arr_np = np.array(time_arr)
 lin_speed_arr_np = np.array(lin_speed_arr)
 ang_speed_arr_np = np.array(ang_speed_arr)
+
+path_np = np.array(path)
 
 print(f"lin: {lin_speed_arr}")
 print(f"lin_length: {len(lin_speed_arr)}\n")
@@ -166,3 +179,4 @@ np.save("./lin_speed_arr.npy", lin_speed_arr_np)
 np.save("./ang_speed_arr.npy", ang_speed_arr_np)
 np.save("./pos_arr_x.npy", pos_arr_x)
 np.save("./pos_arr_y.npy", pos_arr_y)
+np.save("./path.npy", path_np)
