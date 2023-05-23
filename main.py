@@ -7,11 +7,11 @@ from car import Car, getDistance
 from game_window import GameWindow
 
 ####################################################
-meters_per_pixel = 0.01
+meters_per_pixel = 0.005
 sim_step = 0.01  # seconds
 sample_frequency = 10  # Hz
 
-goal_radius = 1  # m
+goal_radius =  0.4 # m
 
 master_linear_speed_limit = 0.2  # m/s
 master_angular_speed_limit = 0.2  # rad/s
