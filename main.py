@@ -9,18 +9,18 @@ from game_window import GameWindow
 ####################################################
 meters_per_pixel = 0.005
 sim_step = 0.01  # seconds
-sample_frequency = 10  # Hz
+sample_frequency = 2  # Hz
 
-goal_radius =  0.4 # m
+goal_radius =  0.5 # m
 
-master_linear_speed_limit = 0.2  # m/s
-master_angular_speed_limit = 0.2  # rad/s
+master_linear_speed_limit = 0.1  # m/s
+master_angular_speed_limit = 0.1  # rad/s
 
 master_linear_control_multiplier = 1
-master_angular_control_multiplier = 8
+master_angular_control_multiplier = 15
 
-master_turn_limit_change_amount_linear = 0.1  # m/s
-master_turn_limit_change_amount_angular = 0.1  # rad/s
+master_turn_limit_change_amount_linear = 0.05  # m/s
+master_turn_limit_change_amount_angular = 0.08 # rad/s
 ####################################################
 
 # convert to pixel

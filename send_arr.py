@@ -20,33 +20,33 @@ def convert_to_step_counts(lin, ang):
 
     # convert to velocity
     for i in range(len(time_arr)):
-        left.append(lin_speed_arr[i] + ang_speed_arr[i] * 15 / 200)  # m/s
-        right.append(lin_speed_arr[i] - ang_speed_arr[i] * 15 / 200)  # m/s
+        left.append(lin_speed_arr[i] * 20000 / 6 / math.pi + ang_speed_arr[i] * 1500 / math.pi / 2)  # m/s
+        right.append(lin_speed_arr[i] * 20000 / 6 / math.pi - ang_speed_arr[i] * 1500 / math.pi / 2)  # m/s
 
-    print("after vel")
-    print(f"time: {time_arr}")
-    print(f"printing left: {left}")
-    print(f"printing right: {right}")
+        # print("after vel")
+        # print(f"time: {time_arr}")
+        # print(f"printing left: {left}")
+        # print(f"printing right: {right}")
 
-    # convert to distance
-    for i in range(len(time_arr) - 1):
-        left[i] *= (time_arr[i+1] - time_arr[i]) / 1000  # m
-        right[i] *= (time_arr[i+1] - time_arr[i]) / 1000  # m
+        # # convert to distance
+        # for i in range(len(time_arr) - 1):
+        #     left[i] *= (time_arr[i+1] - time_arr[i]) / 1000  # m
+        #     right[i] *= (time_arr[i+1] - time_arr[i]) / 1000  # m
 
-    print("after dist")
-    print(f"printing left: {left}")
-    print(f"printing right: {right}")
+        # print("after dist")
+        # print(f"printing left: {left}")
+        # print(f"printing right: {right}")
 
-    # convert to step count
-    for i in range(len(time_arr) - 1):
-        left[i] = left[i] / wheel_circumreference * step_count
-        right[i] = right[i] / wheel_circumreference * step_count
+        # # convert to step count
+        # for i in range(len(time_arr) - 1):
+        #     left[i] = left[i] / wheel_circumreference * step_count
+        #     right[i] = right[i] / wheel_circumreference * step_count
 
     return left, right
 
 l, r = convert_to_step_counts(lin_speed_arr, ang_speed_arr)
-l = [int(x) for x in l]
-r = [int(x) for x in r]
+l = [abs(int(x)) for x in l]
+r = [abs(int(x)) for x in r]
 
 # print("\n\n\n\n\n\n STEP COUNTS:")
 # print(f"printing linear: {lin_speed_arr}")
