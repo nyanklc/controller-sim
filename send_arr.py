@@ -1,5 +1,7 @@
 import numpy as np
 import math
+import socket
+import time
 
 wheel_radius = 3 / 100  # m
 wheel_circumreference = 2 * math.pi * wheel_radius  # m
@@ -44,60 +46,59 @@ def convert_to_step_counts(lin, ang):
 
     return left, right
 
-l, r = convert_to_step_counts(lin_speed_arr, ang_speed_arr)
-l = [int(x) for x in l]
-r = [int(x) for x in r]
+def send_array():
 
-# print("\n\n\n\n\n\n STEP COUNTS:")
-# print(f"printing linear: {lin_speed_arr}")
-# print(f"printing angular: {ang_speed_arr}")
-# print(f"time array: {time_arr}")
+    l, r = convert_to_step_counts(lin_speed_arr, ang_speed_arr)
+    l = [int(x) for x in l]
+    r = [int(x) for x in r]
 
-print("\n\n\n\n\n\n STEP COUNTS:")
-print(f"printing left: {l}")
-print(f"printing right: {r}")
-print(f"time array: {time_arr}")
+    # print("\n\n\n\n\n\n STEP COUNTS:")
+    # print(f"printing linear: {lin_speed_arr}")
+    # print(f"printing angular: {ang_speed_arr}")
+    # print(f"time array: {time_arr}")
 
-import socket
-import time
+    print("\n\n\n\n\n\n STEP COUNTS:")
+    print(f"printing left: {l}")
+    print(f"printing right: {r}")
+    print(f"time array: {time_arr}")
 
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-sock.connect(("192.168.4.1", 333))
-socket_output_stream = sock.makefile('w')
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.connect(("192.168.4.1", 333))
+    socket_output_stream = sock.makefile('w')
 
-print("sending left")
-for i in range(len(l)):
-    data_str = "{:.2f} ".format(l[i])
-    print(data_str)
-    socket_output_stream.write(data_str)
+    print("sending left")
+    for i in range(len(l)):
+        data_str = "{:.2f} ".format(l[i])
+        print(data_str)
+        socket_output_stream.write(data_str)
+        socket_output_stream.flush()
+        time.sleep(0.2)
+    print("sending -999999")
+    socket_output_stream.write("-999.99 ")
     socket_output_stream.flush()
-    time.sleep(0.2)
-print("sending -999999")
-socket_output_stream.write("-999.99 ")
-socket_output_stream.flush()
 
-time.sleep(2)
+    time.sleep(2)
 
-print("sending right")
-for i in range(len(r)):
-    data_str = "{:.2f} ".format(r[i])
-    print(data_str)
-    socket_output_stream.write(data_str)
+    print("sending right")
+    for i in range(len(r)):
+        data_str = "{:.2f} ".format(r[i])
+        print(data_str)
+        socket_output_stream.write(data_str)
+        socket_output_stream.flush()
+        time.sleep(0.2)
+    print("sending -999999")
+    socket_output_stream.write("-999.99 ")
+    socket_output_stream.flush() 
+
+    time.sleep(2)
+
+    print("sending time")
+    for i in range(len(time_arr)):
+        data_str = "{:.2f} ".format(time_arr[i])
+        print(data_str)
+        socket_output_stream.write(data_str)
+        socket_output_stream.flush()
+        time.sleep(0.2)
+    print("sending -999999")
+    socket_output_stream.write("-999.99 ")
     socket_output_stream.flush()
-    time.sleep(0.2)
-print("sending -999999")
-socket_output_stream.write("-999.99 ")
-socket_output_stream.flush() 
-
-time.sleep(2)
-
-print("sending time")
-for i in range(len(time_arr)):
-    data_str = "{:.2f} ".format(time_arr[i])
-    print(data_str)
-    socket_output_stream.write(data_str)
-    socket_output_stream.flush()
-    time.sleep(0.2)
-print("sending -999999")
-socket_output_stream.write("-999.99 ")
-socket_output_stream.flush()
