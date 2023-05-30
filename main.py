@@ -12,7 +12,7 @@ def perform_simulation(path):
     sim_step = 0.01  # seconds
     sample_frequency = 10  # Hz
 
-    goal_radius =  0.4 # m
+    goal_radius =  0.3 # m
 
     master_linear_speed_limit = 0.2  # m/s
     master_angular_speed_limit = 0.2  # rad/s
@@ -23,6 +23,8 @@ def perform_simulation(path):
     master_turn_limit_change_amount_linear = 0.1  # m/s
     master_turn_limit_change_amount_angular = 0.1  # rad/s
     ####################################################
+
+    #path = [(x[0], 2*x[1]) for x in path2]
 
     # convert to pixel
     goal_radius /= meters_per_pixel

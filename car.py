@@ -111,7 +111,7 @@ class Car(Object):
     def get_goal(self, path):
         max_dist_index = None
         max_dist = 0
-        for i in range(self.goal_index, len(path)):
+        for i in range(self.goal_index, len(path) if len(path) < self.goal_index + 5 else self.goal_index + 5):
             dist = getDistance((self.x, self.y), (path[i][0], path[i][1]))
             if  dist < self.goal_radius and dist > max_dist:
                 self.goal_index = i

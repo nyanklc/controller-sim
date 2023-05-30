@@ -2,16 +2,13 @@ import numpy as np
 import math
 import socket
 import time
+from tqdm import tqdm
 
 wheel_radius = 3 / 100  # m
 wheel_circumreference = 2 * math.pi * wheel_radius  # m
 step_count = 200
 
-time_arr = np.load("./time_arr.npy")
-lin_speed_arr = np.load("./lin_speed_arr.npy")
-ang_speed_arr = np.load("./ang_speed_arr.npy")
-
-def convert_to_step_counts(lin, ang):
+def convert_to_step_counts(lin_speed_arr, ang_speed_arr, time_arr):
     left = []
     right = []
 
@@ -22,8 +19,11 @@ def convert_to_step_counts(lin, ang):
 
     # convert to velocity
     for i in range(len(time_arr)):
-        left.append(lin_speed_arr[i] + ang_speed_arr[i] * 15 / 200)  # m/s
-        right.append(lin_speed_arr[i] - ang_speed_arr[i] * 15 / 200)  # m/s
+        left.append(1.5 * lin_speed_arr[i] + 1.3 * ang_speed_arr[i] * 15 / 200)  # m/s
+        right.append(1.5 * lin_speed_arr[i] - 1.3 * ang_speed_arr[i] * 15 / 200)  # m/s
+
+        # left.append(lin_speed_arr[i] + ang_speed_arr[i] * 15 / 200)  # m/s
+        # right.append(lin_speed_arr[i] - ang_speed_arr[i] * 15 / 200)  # m/s
 
     print("after vel")
     print(f"time: {time_arr}")
@@ -48,9 +48,17 @@ def convert_to_step_counts(lin, ang):
 
 def send_array():
 
-    l, r = convert_to_step_counts(lin_speed_arr, ang_speed_arr)
+    time_arr = np.load("./time_arr.npy")
+    lin_speed_arr = np.load("./lin_speed_arr.npy")
+    ang_speed_arr = np.load("./ang_speed_arr.npy")
+
+    l, r = convert_to_step_counts(lin_speed_arr, ang_speed_arr,time_arr)
     l = [int(x) for x in l]
     r = [int(x) for x in r]
+    
+    print("Time array length: " + str(len(time_arr)))
+    print("Lin array length: " + str(len(l)))
+    print("Ang array length: " + str(len(r)))
 
     # print("\n\n\n\n\n\n STEP COUNTS:")
     # print(f"printing linear: {lin_speed_arr}")
@@ -67,38 +75,38 @@ def send_array():
     socket_output_stream = sock.makefile('w')
 
     print("sending left")
-    for i in range(len(l)):
+    for i in tqdm(range(len(l))):
         data_str = "{:.2f} ".format(l[i])
-        print(data_str)
+        #print(data_str)
         socket_output_stream.write(data_str)
         socket_output_stream.flush()
         time.sleep(0.2)
-    print("sending -999999")
+    #print("sending -999999")
     socket_output_stream.write("-999.99 ")
     socket_output_stream.flush()
 
     time.sleep(2)
 
     print("sending right")
-    for i in range(len(r)):
+    for i in tqdm(range(len(r))):
         data_str = "{:.2f} ".format(r[i])
-        print(data_str)
+        #print(data_str)
         socket_output_stream.write(data_str)
         socket_output_stream.flush()
         time.sleep(0.2)
-    print("sending -999999")
+    #print("sending -999999")
     socket_output_stream.write("-999.99 ")
     socket_output_stream.flush() 
 
     time.sleep(2)
 
     print("sending time")
-    for i in range(len(time_arr)):
+    for i in tqdm(range(len(time_arr))):
         data_str = "{:.2f} ".format(time_arr[i])
-        print(data_str)
+        #print(data_str)
         socket_output_stream.write(data_str)
         socket_output_stream.flush()
         time.sleep(0.2)
-    print("sending -999999")
+    #print("sending -999999")
     socket_output_stream.write("-999.99 ")
     socket_output_stream.flush()
