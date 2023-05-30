@@ -109,12 +109,30 @@ class Car(Object):
         self.angular_speed += self.angular_controller.update(self.angular_speed, dt)
 
     def get_goal(self, path):
+        self.reached_current_goal = False
+        if getDistance((self.x, self.y), (path[self.goal_index][0], path[self.goal_index][1])) < self.goal_radius:
+            self.reached_current_goal = True
+            print(self.reached_current_goal)
+
         max_dist_index = None
         max_dist = 0
-        for i in range(self.goal_index, len(path) if len(path) < self.goal_index + 5 else self.goal_index + 5):
+        radius_icinde_sayi = 0
+        for i in range(self.goal_index + 1, len(path) if len(path) < self.goal_index + 5 else self.goal_index + 5):
             dist = getDistance((self.x, self.y), (path[i][0], path[i][1]))
-            if  dist < self.goal_radius and dist > max_dist:
-                self.goal_index = i
+            if dist < self.goal_radius:
+                radius_icinde_sayi += 1
+                print("radius icinde")
+                if dist > max_dist:
+                    print("max")
+                    max_dist = dist
+                    self.goal_index = i
+                    self.last_goal_index = self.goal_index
+
+        if radius_icinde_sayi == 0:
+            print("radius icinde yok")
+            if self.reached_current_goal:
+                self.last_goal_index += 1
+                self.goal_index = self.last_goal_index + 1
 
     def calculate_goal_yaw(self, path):
         self.goal_yaw = getAngle((self.x, self.y), (path[self.goal_index][0], path[self.goal_index][1]))
