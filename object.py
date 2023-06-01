@@ -20,7 +20,7 @@ class Object:
         self.polygon = definePolygon(SHAPES[shape_type], radius)
         self.footprint = transformPolygon(self.polygon, self.x, self.y, self.yaw)
         self.color = color
-        
+
     def update(self, dx=0, dy=0, dyaw=0):
         self.footprint = transformPolygon(self.footprint, dx, dy, dyaw, (self.x, self.y))
         self.x += dx

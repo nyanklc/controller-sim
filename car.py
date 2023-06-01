@@ -23,18 +23,76 @@ def getDistance(point1, point2):
     return math.hypot(point2[1]-point1[1], point2[0]-point1[0])
 
 class Car(Object):
-    def __init__(self, color:tuple, size:float=50, x:float=0, y:float=0, yaw:float=0, initial_speed:float=0):
+    def __init__(self,
+                 color:tuple,
+                 goal_rad:float=0,
+                 size:float=50,
+                 x:float=0,
+                 y:float=0,
+                 yaw:float=0,
+                 initial_speed:float=0,
+                 lin_max=300,
+                 ang_max=0.3,
+                 lin_mult=1,
+                 ang_mult=1,
+                 turn_limit_change_amount_linear=0.1,
+                 turn_limit_change_amount_angular=0.1,
+                 mpp=0.01,
+                 camera_track=False):
+
         Object.__init__(self, shape_type="rectangle", color=color, radius=math.sqrt(2) * size / 2, x=x, y=y, yaw=yaw)
         self.speed:float = initial_speed
         self.angular_speed = 0
         self.has_orientation = True
+        self.goal_radius = goal_rad
+        self.goal_index = 0
+
+        self.LIN_LIM_MAX = lin_max
+        self.ANG_LIM_MAX = ang_max
+
+        self.linear_control_multiplier = lin_mult
+        self.angular_control_multiplier = ang_mult
+
+        self.turn_limit_change_amount_linear = turn_limit_change_amount_linear
+        self.turn_limit_change_amount_angular = turn_limit_change_amount_angular
+
+        self.meters_per_pixel = mpp
+
+        self.camera_track = camera_track
 
     def updateAutomatic(self, pos, yaw, dt):
+        LIN_LIM_MAX = self.LIN_LIM_MAX
+        ANG_LIM_MAX = self.ANG_LIM_MAX
+
         yaw_should_be = getAngle((self.x, self.y), pos)
-        self.angular_controller.setGoal(getAngularDifference(self.yaw, yaw_should_be) * 30)
-        self.controller.setGoal(getDistance((self.x, self.y), pos) * 30)
+
+        dist = getDistance((self.x, self.y), pos)
+        ang_diff = getAngularDifference(self.yaw, yaw_should_be)
+
+        # limit linear speed if it's a sharp turn (45 degrees)
+        if math.fabs(ang_diff) > math.pi/4:
+            print("SLOWING DOWN FOR TURN")
+            LIN_LIM_MAX -= self.turn_limit_change_amount_linear
+            ANG_LIM_MAX += self.turn_limit_change_amount_angular
+        else:
+            LIN_LIM_MAX = self.LIN_LIM_MAX
+            ANG_LIM_MAX = self.ANG_LIM_MAX
+
+        self.controller.setGoal(dist * self.linear_control_multiplier)
+        self.angular_controller.setGoal(ang_diff * self.angular_control_multiplier)
         self.speed += self.controller.update(self.speed, dt)
         self.angular_speed += self.angular_controller.update(self.angular_speed, dt)
+
+        if self.speed > LIN_LIM_MAX:
+            self.speed = LIN_LIM_MAX
+        elif self.speed < -LIN_LIM_MAX:
+            self.speed = -LIN_LIM_MAX
+
+
+        if self.angular_speed > ANG_LIM_MAX:
+            self.angular_speed = ANG_LIM_MAX
+        elif self.angular_speed < -ANG_LIM_MAX:
+            self.angular_speed = -ANG_LIM_MAX
 
     """ automatic mode if goal is provided """
     def update(self, dt, goal_position=None, goal_yaw=None):
@@ -46,9 +104,38 @@ class Car(Object):
         if goal_position is not None and goal_yaw is not None:
             self.updateAutomatic(goal_position, goal_yaw, dt)
             return
-        
+
         self.speed += self.controller.update(self.speed, dt)
         self.angular_speed += self.angular_controller.update(self.angular_speed, dt)
+
+    def get_goal(self, path):
+        self.reached_current_goal = False
+        if getDistance((self.x, self.y), (path[self.goal_index][0], path[self.goal_index][1])) < self.goal_radius:
+            self.reached_current_goal = True
+            print(self.reached_current_goal)
+
+        max_dist_index = None
+        max_dist = 0
+        radius_icinde_sayi = 0
+        for i in range(self.goal_index + 1, len(path) if len(path) < self.goal_index + 5 else self.goal_index + 5):
+            dist = getDistance((self.x, self.y), (path[i][0], path[i][1]))
+            if dist < self.goal_radius:
+                radius_icinde_sayi += 1
+                print("radius icinde")
+                if dist > max_dist:
+                    print("max")
+                    max_dist = dist
+                    self.goal_index = i
+                    self.last_goal_index = self.goal_index
+
+        if radius_icinde_sayi == 0:
+            print("radius icinde yok")
+            if self.reached_current_goal:
+                self.last_goal_index += 1
+                self.goal_index = self.last_goal_index + 1
+
+    def calculate_goal_yaw(self, path):
+        self.goal_yaw = getAngle((self.x, self.y), (path[self.goal_index][0], path[self.goal_index][1]))
 
     def setSpeed(self, value):
         self.controller.setGoal(value)
@@ -56,32 +143,36 @@ class Car(Object):
     def setAngularSpeed(self, value):
         self.angular_controller.setGoal(value)
 
+    def print_speeds(self):
+        print(f"linear: {self.speed * self.meters_per_pixel}")
+        print(f"angular: {self.angular_speed * self.meters_per_pixel}")
+
     def getSpeed(self):
         return self.speed
-    
+
     def getAngularSpeed(self):
         return self.angular_speed
 
     def getSpeedGoal(self):
         return self.controller.getGoal()
-    
+
     def getAngularSpeedGoal(self):
         return self.angular_controller.getGoal()
 
-    def setController(self, method, params):
+    def setController(self, method, params, limma, limmi):
         if method == 'pid':
             p = params[0]
             i = params[1]
             d = params[2]
             set_value = params[3]
             # TODO: read other params as well
-            self.controller = PIDController(p, i, d, set_value)
+            self.controller = PIDController(p, i, d, set_value, lim_max=limma, lim_min=limmi)
 
-    def setAngularController(self, method, params):
+    def setAngularController(self, method, params, limma, limmi):
         if method == 'pid':
             p = params[0]
             i = params[1]
             d = params[2]
             set_value = params[3]
             # TODO: read other params as well
-            self.angular_controller = PIDController(p, i, d, set_value)
+            self.angular_controller = PIDController(p, i, d, set_value, lim_max=limma, lim_min=limmi)

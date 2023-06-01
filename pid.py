@@ -1,5 +1,5 @@
 class PIDController:
-    def __init__(self, p, i, d, set_value, last_error=0, last_measurement=0, lim_min=-100, lim_max=100):
+    def __init__(self, p, i, d, set_value, last_error=0, last_measurement=0, lim_min=-30, lim_max=30):
         self.Kp = p
         self.Ki = i
         self.Kd = d
@@ -61,7 +61,7 @@ class PIDController:
         self.last_measurement = measurement
         self.integrator = integral
         self.differentiator = derivative
-        
+
         return self.out
 
     def setGoal(self, newint):
