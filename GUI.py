@@ -1,59 +1,84 @@
 import tkinter as tk
+import customtkinter as ctk
 from tkinter import messagebox
 import math
 import copy
 import threading
 from main import perform_simulation
 from send_arr import send_array
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
+from car import getDistance
 
 class FractalDrawer:
     def __init__(self, master):
+        
         self.master = master
-        self.master.title("Fractal Drawer")
+        self.master.title("Path Drawing")
+        
+        self.sidebar_frame = ctk.CTkFrame(self.master, width=650, height=450, corner_radius=7)
+        self.sidebar_frame.pack(side=tk.LEFT, padx=10, pady=10)
+        
+        self.sidebar_frame2 = ctk.CTkFrame(self.master, width=650, height=450, corner_radius=7)
+        self.sidebar_frame2.pack(side=tk.RIGHT, padx=10, pady=10)
+        
+        self.sidebar_frame3 = ctk.CTkFrame(self.master, width=500, height=500, corner_radius=7)
+        self.sidebar_frame3.pack(side=tk.RIGHT, padx=10, pady=10)
+        
+        # yazı
+        self.label = ctk.CTkLabel(self.sidebar_frame3, text="Actual Path to be Sent", font=ctk.CTkFont(size=16, weight="bold"))
+        self.label.pack(side=tk.TOP, padx=20, pady=(2,2))
 
+        # yazı
+        self.label = ctk.CTkLabel(self.sidebar_frame, text="Drawing Canvas", font=ctk.CTkFont(size=16, weight="bold"))
+        self.label.pack(side=tk.TOP, padx=20, pady=(2,2))
+        
         # Set up canvas for drawing path
-        self.canvas = tk.Canvas(self.master, bg="black", width=600, height=400, highlightthickness=0)
-        self.canvas.pack(side=tk.TOP, padx=10, pady=10)
+        self.canvas = ctk.CTkCanvas(self.sidebar_frame, bg="white", width=650, height=450, highlightthickness=0)
+        self.canvas.pack(side=tk.TOP, padx=10, pady=(2,2))
         self.canvas.bind("<B1-Motion>", self.track_path)
         self.canvas.bind("<ButtonPress-1>", self.start_sampling)  # Bind mouse button press event
         self.canvas.bind("<ButtonRelease-1>", self.stop_sampling)  # Bind mouse button release event
-        self.line_color = "yellow"
-
-        # Set up angle slider and input box
-        self.angle_var = tk.DoubleVar()
-        self.angle_var.set(0.0)
-        self.angle_slider = tk.Scale(self.master, label="Angle (degrees)", from_=0, to=360, variable=self.angle_var,
-                                     orient=tk.HORIZONTAL, command=self.update_angle)
-        self.angle_slider.pack(side=tk.TOP, padx=10, pady=10)
-        self.angle_input = tk.Entry(self.master, textvariable=self.angle_var)
-        self.angle_input.pack(side=tk.TOP, padx=10, pady=5)
-
-        # Set up iteration count slider and input box
-        self.iteration_var = tk.IntVar()
-        self.iteration_var.set(1)
-        self.iteration_slider = tk.Scale(self.master, label="Iteration Count", from_=1, to=10000, variable=self.iteration_var,
-                                     orient=tk.HORIZONTAL, command=self.update_iteration)
-        self.iteration_slider.pack(side=tk.TOP, padx=10, pady=10)
-        self.iteration_input = tk.Entry(self.master, textvariable=self.iteration_var)
-        self.iteration_input.pack(side=tk.TOP, padx=10, pady=5)
-        self.iteration_input.bind("<FocusOut>", self.update_iteration_input)  # Bind focus out event to update iteration slider
+        self.line_color = "blue"
+        
+        # yazı
+        self.vis_label = ctk.CTkLabel(self.sidebar_frame, text="Smoothed Path", font=ctk.CTkFont(size=16, weight="bold"))
+        self.vis_label.pack(side=tk.TOP, padx=10, pady=(2,2))
+        
+        # Set up canvas for drawing the path
+        self.visual_canvas = ctk.CTkCanvas(self.sidebar_frame, bg="white", width=650, height=450, highlightthickness=0)
+        self.visual_canvas.pack(side=tk.BOTTOM, padx=10, pady=(2,10))
+        
+        v = tk.StringVar()
+        v.set(2)
+        
+        # yazı
+        self.vis_label = ctk.CTkLabel(self.sidebar_frame2, text="Corner Smoothing Degree", font=ctk.CTkFont(size=14))
+        self.vis_label.pack(side=tk.TOP, padx=10, pady=(2,2))
+        
+        ctk.CTkRadioButton(self.sidebar_frame2, text="Low", variable=v, value=1).pack(pady=(10,0))
+        ctk.CTkRadioButton(self.sidebar_frame2, text="Medium", variable=v, value=2).pack()
+        ctk.CTkRadioButton(self.sidebar_frame2, text="High", variable=v, value=3).pack()
 
         # Set up send path button
-        self.send_button = tk.Button(self.master, text="Send the path", command=self.show_popup)
-        self.send_button.pack(side=tk.TOP, padx=10, pady=10)
+        self.send_button = ctk.CTkButton(self.sidebar_frame2, text="Send the path", command=self.show_popup)
+        self.send_button.pack(side=tk.TOP, padx=10, pady=(60,10))
 
         # Set up print path button
-        self.print_button = tk.Button(self.master, text="Print Path", command=self.print_path)
+        self.print_button = ctk.CTkButton(self.sidebar_frame2, text="Print Path", command=self.print_path)
         self.print_button.pack(side=tk.TOP, padx=10, pady=10)
 
         # Set up simulation button
-        self.simulation_button = tk.Button(self.master, text="Perform Simulation", command=self.simulate)
-        self.simulation_button.pack(side=tk.TOP, padx=(5, 10), pady=10)
+        self.simulation_button = ctk.CTkButton(self.sidebar_frame2, text="Perform Simulation", command=self.simulate)
+        self.simulation_button.pack(side=tk.TOP, padx=(10, 10), pady=10)
 
         # Set up clear button
-        self.clear_button = tk.Button(self.master, text="Clear", command=self.clear_canvas)
-        self.clear_button.pack(side=tk.BOTTOM, padx=10, pady=10)
+        self.clear_button = ctk.CTkButton(self.sidebar_frame2, text="Clear", command=self.clear_canvas)
+        self.clear_button.pack(side=tk.TOP, padx=10, pady=10)
 
+        
         # List to store path coordinates
         self.sampling_active = False
         self.path = []
@@ -79,7 +104,31 @@ class FractalDrawer:
             self.timer = None
     
     def simulate(self):
+        self.sidebar_frame3.destroy()
+        self.sidebar_frame3 = ctk.CTkFrame(self.master, width=500, height=500, corner_radius=7)
+        self.sidebar_frame3.pack(side=tk.RIGHT, padx=10, pady=10)
+        # yazı
+        self.label = ctk.CTkLabel(self.sidebar_frame3, text="Actual Path to be Sent (in meters)", font=ctk.CTkFont(size=16, weight="bold"))
+        self.label.pack(side=tk.TOP, padx=20, pady=(2,2))
         perform_simulation(self.path)
+        # the figure that will contain the plot
+        fig = Figure(figsize = (5, 5), dpi = 100)
+        # adding the subplot
+        plot1 = fig.add_subplot(111)
+        x = np.load("./pos_arr_x.npy")*0.005
+        y = np.load("./pos_arr_y.npy")*0.005
+        plot1.plot(x, -y, "-gD")
+        # creating the Tkinter canvas
+        # containing the Matplotlib figure
+        self.pltcanvas = FigureCanvasTkAgg(fig, master = self.sidebar_frame3)  
+        self.pltcanvas.draw()   
+        # placing the canvas on the Tkinter window
+        self.pltcanvas.get_tk_widget().pack()   
+        # creating the Matplotlib toolbar
+        toolbar = NavigationToolbar2Tk(self.pltcanvas, self.sidebar_frame3)
+        toolbar.update()
+        # placing the toolbar on the Tkinter window
+        self.pltcanvas.get_tk_widget().pack()
 
     def append_point(self):
         # Append the current mouse coordinates to the path
@@ -102,7 +151,8 @@ class FractalDrawer:
     def show_popup(self):
         # Show a popup information window with the message "Path is sent!"
         send_array()
-        messagebox.showinfo("Information", "Path is sent!")
+        messagebox.showinfo("Information", "Path is completely sent!")
+        
 
     def print_path(self):
         # Print the path coordinates to console
@@ -112,7 +162,11 @@ class FractalDrawer:
 
     def clear_canvas(self):
         # Clear the canvas and reset the path list
+        self.visual_canvas.delete("all")
         self.canvas.delete("all")
+        for item in self.pltcanvas.get_tk_widget().find_all():
+            self.pltcanvas.get_tk_widget().delete(item)
+        self.pltcanvas = None
         self.path = []
 
     def update_angle(self, angle):
@@ -154,7 +208,9 @@ class FractalDrawer:
             self.timer = None
 
             self.remove_duplicates()
+            self.dilute()
             self.corner_cut()
+            self.dilute()
             self.visualize_path()
 
     def remove_duplicates(self):
@@ -194,15 +250,31 @@ class FractalDrawer:
             temp.append(self.path[-1])
             self.path = temp
 
+    def dilute(self):
+        for i in range(10):
+            temp = [self.path[0]]
+            i = 1
+            adjusted = False
+            while i + 1 < len(self.path):
+                distance = getDistance(self.path[i], self.path[i-1])
+                if distance < 5:
+                    adjusted = True
+                    temp.append(self.path[i+1])
+                    i += 2
+                else:
+                    temp.append(self.path[i])
+                    i += 1
+            
+            if not adjusted:
+                break
+
+            temp.append(self.path[-1])
+            self.path = temp
+
     def visualize_path(self):
-        # Create a new window for visualization
-        visual_window = tk.Toplevel(self.master)
-        visual_window.title("Path Visualization")
-
-        # Set up canvas for drawing the path
-        visual_canvas = tk.Canvas(visual_window, bg="black", width=600, height=400, highlightthickness=0)
-        visual_canvas.pack(side=tk.TOP, padx=10, pady=10)
-
+        
+        visual_canvas = self.visual_canvas
+        
         # Draw the path on the canvas using the same colors
         if len(self.path) > 1:
             prev_x, prev_y = self.path[0]
@@ -221,7 +293,7 @@ class FractalDrawer:
 
         return True
 
-
-root = tk.Tk()
+ctk.set_appearance_mode("light")
+root = ctk.CTk()
 app = FractalDrawer(root)
 root.mainloop()

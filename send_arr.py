@@ -4,10 +4,27 @@ import socket
 import struct
 import time
 from tqdm import tqdm
+from tkinter import messagebox as msgb
+import tkinter as tk
 
 wheel_radius = 3 / 100  # m
 wheel_circumreference = 2 * math.pi * wheel_radius  # m
 step_count = 200
+
+def showMessage(message, type='info', timeout=2500):
+    
+    root = tk.Tk()
+    root.withdraw()
+    try:
+        root.after(timeout, root.destroy)
+        if type == 'info':
+            msgb.showinfo('Info', message, master=root)
+        elif type == 'warning':
+            msgb.showwarning('Warning', message, master=root)
+        elif type == 'error':
+            msgb.showerror('Error', message, master=root)
+    except:
+        pass
 
 def convert_to_step_counts(lin_speed_arr, ang_speed_arr, time_arr):
     left = []
@@ -88,29 +105,25 @@ def send_array():
     r = divide_list_into_chunks(r,100)
     time_arr = divide_list_into_chunks(time_arr,100)
 
-    print("sending left")
+    showMessage("Left wheel data is sending!", timeout=1000)
     for chunk in l:
         byte_array_chunk_left = struct.pack('!' + str(len(chunk)) + 'f', *chunk)
         sock.sendall(byte_array_chunk_left)
         time.sleep(1)
-
     time.sleep(1)
 
-    print("sending right")
+    showMessage("Right wheel data is sending!", timeout=1000)
     for chunk in r:
         byte_array_chunk_right = struct.pack('!' + str(len(chunk)) + 'f', *chunk)
         sock.sendall(byte_array_chunk_right)
         time.sleep(1)
-
     time.sleep(1)
 
-    print("sending time")
+    showMessage("Time data is sending!", timeout=1000)
     for chunk in time_arr:
         byte_array_chunk_time = struct.pack('!' + str(len(chunk)) + 'f', *chunk)
         sock.sendall(byte_array_chunk_time)
         time.sleep(1)
-
-    print("Path sent!")
 
     """
     print("sending left")

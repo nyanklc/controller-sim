@@ -15,13 +15,13 @@ def perform_simulation(path):
     goal_radius =  0.3 # m
 
     master_linear_speed_limit = 0.2  # m/s
-    master_angular_speed_limit = 0.2  # rad/s
+    master_angular_speed_limit = 1.7  # rad/s
 
     master_linear_control_multiplier = 1
     master_angular_control_multiplier = 8
 
     master_turn_limit_change_amount_linear = 0.1  # m/s
-    master_turn_limit_change_amount_angular = 0.1  # rad/s
+    master_turn_limit_change_amount_angular = 0.1 # rad/s
     ####################################################
 
     #path = [(x[0], 2*x[1]) for x in path2]

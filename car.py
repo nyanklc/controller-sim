@@ -46,6 +46,7 @@ class Car(Object):
         self.has_orientation = True
         self.goal_radius = goal_rad
         self.goal_index = 0
+        self.last_goal_index = 0
 
         self.LIN_LIM_MAX = lin_max
         self.ANG_LIM_MAX = ang_max

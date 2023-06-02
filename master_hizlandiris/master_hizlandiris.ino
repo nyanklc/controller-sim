@@ -44,7 +44,7 @@ void setup_wifi_module() {
     Serial1.println("AT+CWMODE=3");
   }
   Serial1.println("AT+CWLIF");
-  while(!Serial1.find("192.168.4.2")){
+  while(!Serial1.find("192.168.4.2") and !Serial1.find("192.168.4.3")){
     Serial1.println("AT+CWLIF");
     Serial.println("Waiting for connection.");
   }
@@ -205,10 +205,10 @@ void setup()
 
   while(!receive_from_gui());
 
-  debug_print();
+  //debug_print();
 
-  MotorLeft.setSpeed(2000);
-  MotorRight.setSpeed(2000);
+  MotorLeft.setSpeed(120);
+  MotorRight.setSpeed(120);
 
   Serial.println("millis");
   millis_begin = millis();
@@ -242,9 +242,10 @@ void loop()
     if (curr_time - time_arr[current_index] >
     (time_interval / motor_left_arr[current_index]) * left_time_step_count )
     {
-      if (left_time_step_count != motor_left_arr[current_index])
+      if (left_time_step_count != abs(motor_left_arr[current_index]))
       {
-        MotorLeft.step(1);
+        int step_dir = (motor_left_arr[current_index] > 0) ? 1 : -1;
+        MotorLeft.step(step_dir);
         left_time_step_count++;
       }
     }
@@ -257,9 +258,10 @@ void loop()
     if (curr_time - time_arr[current_index] >
     (time_interval / motor_right_arr[current_index]) * right_time_step_count )
     {
-      if (right_time_step_count != motor_right_arr[current_index])
+      if (right_time_step_count != abs(motor_right_arr[current_index]))
       {
-        MotorRight.step(1);
+        int step_dir = (motor_right_arr[current_index] > 0) ? 1 : -1;
+        MotorRight.step(step_dir);
         right_time_step_count++;
       }
     }
