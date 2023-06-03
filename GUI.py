@@ -14,19 +14,19 @@ from car import getDistance
 
 class FractalDrawer:
     def __init__(self, master):
-        
+
         self.master = master
         self.master.title("Path Drawing")
-        
+
         self.sidebar_frame = ctk.CTkFrame(self.master, width=650, height=450, corner_radius=7)
         self.sidebar_frame.pack(side=tk.LEFT, padx=10, pady=10)
-        
+
         self.sidebar_frame2 = ctk.CTkFrame(self.master, width=650, height=450, corner_radius=7)
         self.sidebar_frame2.pack(side=tk.RIGHT, padx=10, pady=10)
-        
+
         self.sidebar_frame3 = ctk.CTkFrame(self.master, width=500, height=500, corner_radius=7)
         self.sidebar_frame3.pack(side=tk.RIGHT, padx=10, pady=10)
-        
+
         # yazı
         self.label = ctk.CTkLabel(self.sidebar_frame3, text="Actual Path to be Sent", font=ctk.CTkFont(size=16, weight="bold"))
         self.label.pack(side=tk.TOP, padx=20, pady=(2,2))
@@ -34,7 +34,7 @@ class FractalDrawer:
         # yazı
         self.label = ctk.CTkLabel(self.sidebar_frame, text="Drawing Canvas", font=ctk.CTkFont(size=16, weight="bold"))
         self.label.pack(side=tk.TOP, padx=20, pady=(2,2))
-        
+
         # Set up canvas for drawing path
         self.canvas = ctk.CTkCanvas(self.sidebar_frame, bg="white", width=650, height=450, highlightthickness=0)
         self.canvas.pack(side=tk.TOP, padx=10, pady=(2,2))
@@ -42,22 +42,22 @@ class FractalDrawer:
         self.canvas.bind("<ButtonPress-1>", self.start_sampling)  # Bind mouse button press event
         self.canvas.bind("<ButtonRelease-1>", self.stop_sampling)  # Bind mouse button release event
         self.line_color = "blue"
-        
+
         # yazı
         self.vis_label = ctk.CTkLabel(self.sidebar_frame, text="Smoothed Path", font=ctk.CTkFont(size=16, weight="bold"))
         self.vis_label.pack(side=tk.TOP, padx=10, pady=(2,2))
-        
+
         # Set up canvas for drawing the path
         self.visual_canvas = ctk.CTkCanvas(self.sidebar_frame, bg="white", width=650, height=450, highlightthickness=0)
         self.visual_canvas.pack(side=tk.BOTTOM, padx=10, pady=(2,10))
-        
+
         v = tk.StringVar()
         v.set(2)
-        
+
         # yazı
         self.vis_label = ctk.CTkLabel(self.sidebar_frame2, text="Corner Smoothing Degree", font=ctk.CTkFont(size=14))
         self.vis_label.pack(side=tk.TOP, padx=10, pady=(2,2))
-        
+
         ctk.CTkRadioButton(self.sidebar_frame2, text="Low", variable=v, value=1).pack(pady=(10,0))
         ctk.CTkRadioButton(self.sidebar_frame2, text="Medium", variable=v, value=2).pack()
         ctk.CTkRadioButton(self.sidebar_frame2, text="High", variable=v, value=3).pack()
@@ -78,7 +78,7 @@ class FractalDrawer:
         self.clear_button = ctk.CTkButton(self.sidebar_frame2, text="Clear", command=self.clear_canvas)
         self.clear_button.pack(side=tk.TOP, padx=10, pady=10)
 
-        
+
         # List to store path coordinates
         self.sampling_active = False
         self.path = []
@@ -92,6 +92,8 @@ class FractalDrawer:
         self.max_deviation = 30
         self.max_iteration = 40
 
+        self.pltcanvas = None
+
     def track_path(self, event):
         # Start the timer if it's not already running
         if not self.timer:
@@ -102,7 +104,7 @@ class FractalDrawer:
         if self.timer:
             self.timer.cancel()  # Stop the timer
             self.timer = None
-    
+
     def simulate(self):
         self.sidebar_frame3.destroy()
         self.sidebar_frame3 = ctk.CTkFrame(self.master, width=500, height=500, corner_radius=7)
@@ -120,8 +122,8 @@ class FractalDrawer:
         plot1.plot(x, -y, "-gD")
         # creating the Tkinter canvas
         # containing the Matplotlib figure
-        self.pltcanvas = FigureCanvasTkAgg(fig, master = self.sidebar_frame3)  
-        self.pltcanvas.draw()   
+        self.pltcanvas = FigureCanvasTkAgg(fig, master = self.sidebar_frame3)
+        self.pltcanvas.draw()
         # placing the canvas on the Tkinter window
         self.pltcanvas.get_tk_widget().pack()   
         # creating the Matplotlib toolbar
@@ -164,10 +166,11 @@ class FractalDrawer:
         # Clear the canvas and reset the path list
         self.visual_canvas.delete("all")
         self.canvas.delete("all")
-        for item in self.pltcanvas.get_tk_widget().find_all():
-            self.pltcanvas.get_tk_widget().delete(item)
-        self.pltcanvas = None
-        self.path = []
+        if self.pltcanvas:
+            for item in self.pltcanvas.get_tk_widget().find_all():
+                self.pltcanvas.get_tk_widget().delete(item)
+            self.pltcanvas = None
+        self.path.clear()
 
     def update_angle(self, angle):
         # Update angle variable from slider and input box

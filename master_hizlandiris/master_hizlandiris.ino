@@ -88,12 +88,12 @@ bool receive_from_gui() {
           completed = true;
           break;
         }
-        else        
+        else
           motor_left_arr[motor_left_arr_length++] = floatValue;
       }
     }
   }
-  
+
   // receive right
   Serial.println("receiving right");
 
@@ -203,7 +203,10 @@ void setup()
   setup_wifi_module();
   Serial.println("wifi set up");
 
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, HIGH);
   while(!receive_from_gui());
+  digitalWrite(LED_BUILTIN, LOW);
 
   //debug_print();
 
@@ -212,6 +215,7 @@ void setup()
 
   Serial.println("millis");
   millis_begin = millis();
+
 }
 
 void loop()
@@ -220,6 +224,17 @@ void loop()
   if (current_index == time_arr_length - 2)
   {
     stop_car();
+
+    time_arr_length = 0;
+    motor_left_arr_length = 0;
+    motor_right_arr_length = 0;
+    current_index = 0;
+
+    digitalWrite(LED_BUILTIN, HIGH);
+    while(!receive_from_gui());
+    digitalWrite(LED_BUILTIN, LOW);
+
+    millis_begin = millis();
     return;
   }
 

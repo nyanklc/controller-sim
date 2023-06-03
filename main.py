@@ -14,6 +14,7 @@ def perform_simulation(path):
     end_sim_distance = 0.1 # m
 
     goal_radius =  0.3 # m
+    goal_index_range = 5
 
     master_linear_speed_limit = 0.2  # m/s
     master_angular_speed_limit = 1.7  # rad/s
@@ -45,7 +46,8 @@ def perform_simulation(path):
                 turn_limit_change_amount_linear=master_turn_limit_change_amount_linear,
                 turn_limit_change_amount_angular=master_turn_limit_change_amount_angular,
                 mpp=meters_per_pixel,
-                camera_track=True)
+                camera_track=True,
+                goal_index_range=goal_index_range)
     # linear speed controller
     p = 0.04
     i = 0.004
