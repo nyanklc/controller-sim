@@ -11,6 +11,7 @@ def perform_simulation(path):
     meters_per_pixel = 0.005
     sim_step = 0.01  # seconds
     sample_frequency = 10  # Hz
+    end_sim_distance = 0.1 # m
 
     goal_radius =  0.3 # m
 
@@ -30,6 +31,7 @@ def perform_simulation(path):
     goal_radius /= meters_per_pixel
     master_linear_speed_limit /= meters_per_pixel
     master_turn_limit_change_amount_linear /= meters_per_pixel
+    end_sim_distance /= meters_per_pixel
 
     master = Car((0,255,0),
                 x=path[0][0],
@@ -75,8 +77,12 @@ def perform_simulation(path):
     pos_arr_y = []
     while True:
         iteration_count += 1
+        if master.goal_index == len(path) - 1:
+            if getDistance((master.x, master.y), path[master.goal_index]) < end_sim_distance:
+                break
 
-        master.get_goal(path)
+        if master.goal_index != len(path)-1:
+            master.get_goal(path)
 
         master.calculate_goal_yaw(path)
 
@@ -101,8 +107,6 @@ def perform_simulation(path):
 
         window.draw([master], path)
 
-        if master.goal_index == len(path) - 1:
-            break
     time_arr_np = np.array(time_arr)
     lin_speed_arr_np = np.array(lin_speed_arr)
     ang_speed_arr_np = np.array(ang_speed_arr)
