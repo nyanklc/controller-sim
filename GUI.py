@@ -7,7 +7,6 @@ import threading
 from main import perform_simulation
 from send_arr import send_array
 import numpy as np
-import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
 from car import getDistance
@@ -28,7 +27,7 @@ class FractalDrawer:
         self.sidebar_frame3.pack(side=tk.RIGHT, padx=10, pady=10)
 
         # yazı
-        self.label = ctk.CTkLabel(self.sidebar_frame3, text="Actual Path to be Sent", font=ctk.CTkFont(size=16, weight="bold"))
+        self.label = ctk.CTkLabel(self.sidebar_frame3, text="Actual Path to be Followed", font=ctk.CTkFont(size=16, weight="bold"))
         self.label.pack(side=tk.TOP, padx=20, pady=(2,2))
 
         # yazı
@@ -110,7 +109,7 @@ class FractalDrawer:
         self.sidebar_frame3 = ctk.CTkFrame(self.master, width=500, height=500, corner_radius=7)
         self.sidebar_frame3.pack(side=tk.RIGHT, padx=10, pady=10)
         # yazı
-        self.label = ctk.CTkLabel(self.sidebar_frame3, text="Actual Path to be Sent (in meters)", font=ctk.CTkFont(size=16, weight="bold"))
+        self.label = ctk.CTkLabel(self.sidebar_frame3, text="Actual Path to be Followed (in meters)", font=ctk.CTkFont(size=16, weight="bold"))
         self.label.pack(side=tk.TOP, padx=20, pady=(2,2))
         self.tim = perform_simulation(self.path)
         # the figure that will contain the plot
@@ -246,10 +245,8 @@ class FractalDrawer:
                     temp.append(new_data)
                 else:
                     temp.append(self.path[i])
-            
             if not entered:
                 break
-            
             temp.append(self.path[-1])
             self.path = temp
 
@@ -267,7 +264,7 @@ class FractalDrawer:
                 else:
                     temp.append(self.path[i])
                     i += 1
-            
+
             if not adjusted:
                 break
 
@@ -275,9 +272,7 @@ class FractalDrawer:
             self.path = temp
 
     def visualize_path(self):
-        
         visual_canvas = self.visual_canvas
-        
         # Draw the path on the canvas using the same colors
         if len(self.path) > 1:
             prev_x, prev_y = self.path[0]
