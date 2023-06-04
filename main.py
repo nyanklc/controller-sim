@@ -128,3 +128,4 @@ def perform_simulation(path):
     np.save("./pos_arr_y.npy", pos_arr_y)
 
     window.quit()
+    return tim

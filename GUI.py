@@ -112,7 +112,7 @@ class FractalDrawer:
         # yazı
         self.label = ctk.CTkLabel(self.sidebar_frame3, text="Actual Path to be Sent (in meters)", font=ctk.CTkFont(size=16, weight="bold"))
         self.label.pack(side=tk.TOP, padx=20, pady=(2,2))
-        perform_simulation(self.path)
+        self.tim = perform_simulation(self.path)
         # the figure that will contain the plot
         fig = Figure(figsize = (5, 5), dpi = 100)
         # adding the subplot
@@ -125,7 +125,7 @@ class FractalDrawer:
         self.pltcanvas = FigureCanvasTkAgg(fig, master = self.sidebar_frame3)
         self.pltcanvas.draw()
         # placing the canvas on the Tkinter window
-        self.pltcanvas.get_tk_widget().pack()   
+        self.pltcanvas.get_tk_widget().pack()
         # creating the Matplotlib toolbar
         toolbar = NavigationToolbar2Tk(self.pltcanvas, self.sidebar_frame3)
         toolbar.update()
@@ -153,8 +153,8 @@ class FractalDrawer:
     def show_popup(self):
         # Show a popup information window with the message "Path is sent!"
         send_array()
-        messagebox.showinfo("Information", "Path is completely sent!")
-        
+        messagebox.showinfo("Information", f"Path is completely sent! Expected completion duration: {self.tim} seconds!")
+
 
     def print_path(self):
         # Print the path coordinates to console
