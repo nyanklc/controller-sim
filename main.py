@@ -6,10 +6,10 @@ import time
 from car import Car, getDistance ,getAngle
 from game_window import GameWindow
 
-def perform_simulation(path):
+def perform_simulation(path, sim_step_from_gui=0.01):
     ####################################################
     meters_per_pixel = 0.005
-    sim_step = 0.01  # seconds
+    sim_step = sim_step_from_gui  # seconds
     sample_frequency = 10  # Hz
     end_sim_distance = 0.1 # m
 
@@ -109,6 +109,13 @@ def perform_simulation(path):
 
         window.draw([master], path)
 
+    exceeded = False
+    if len(time_arr) > 500:
+        exceeded = True
+        time_arr = time_arr[0:500]
+        lin_speed_arr = lin_speed_arr[0:500]
+        ang_speed_arr = ang_speed_arr[0:500]
+
     time_arr_np = np.array(time_arr)
     lin_speed_arr_np = np.array(lin_speed_arr)
     ang_speed_arr_np = np.array(ang_speed_arr)
@@ -128,4 +135,4 @@ def perform_simulation(path):
     np.save("./pos_arr_y.npy", pos_arr_y)
 
     window.quit()
-    return tim
+    return tim, exceeded

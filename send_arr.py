@@ -6,10 +6,31 @@ import time
 from tqdm import tqdm
 from tkinter import messagebox as msgb
 import tkinter as tk
+import subprocess
+import platform
 
 wheel_radius = 3 / 100  # m
 wheel_circumreference = 2 * math.pi * wheel_radius  # m
 step_count = 200
+
+def get_current_ssid():
+    if platform.system() == 'Windows':
+        output = subprocess.check_output(['netsh', 'wlan', 'show', 'interfaces']).decode('utf-8')
+        for line in output.split('\n'):
+            if 'SSID' in line:
+                ssid = line.split(':')[-1].strip()
+                return ssid
+    elif platform.system() == 'Darwin':
+        output = subprocess.check_output(['/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport', '-I']).decode('utf-8')
+        for line in output.split('\n'):
+            if 'SSID' in line:
+                ssid = line.split(':')[-1].strip()
+                return ssid
+    elif platform.system() == 'Linux':
+        output = subprocess.check_output(['iwgetid', '-r']).decode('utf-8').strip()
+        return output
+
+    return None
 
 def showMessage(message, type='info', timeout=2500):
 
@@ -96,9 +117,19 @@ def send_array():
     print(f"printing left: {l}")
     print(f"printing right: {r}")
     print(f"time array: {time_arr}")
+    
+    connection_ssid = get_current_ssid()
+    if connection_ssid != "Master_MeansElec":
+        showMessage("You're not connected to the Master. Please make sure the connection is established.")
+        return False       
+    else:
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.connect(("192.168.4.1", 333))
+        except:
+            showMessage("You're not connected to the Master. Please make sure the connection is established.")
+            return False
 
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect(("192.168.4.1", 333))
     socket_output_stream = sock.makefile('w')
 
     l = divide_list_into_chunks(l,100)
@@ -124,7 +155,8 @@ def send_array():
         byte_array_chunk_time = struct.pack('!' + str(len(chunk)) + 'f', *chunk)
         sock.sendall(byte_array_chunk_time)
         time.sleep(1)
-
+    
+    return True
     """
     print("sending left")
     for i in tqdm(range(len(l))):

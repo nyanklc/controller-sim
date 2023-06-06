@@ -10,12 +10,23 @@ import numpy as np
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
 from car import getDistance
+from PIL import Image, ImageTk
 
 class FractalDrawer:
     def __init__(self, master):
 
+        # Load and resize the background image
+        background_image = Image.open("MEANS.png")
+        background_image = background_image.resize((650, 450), Image.ANTIALIAS)
+        background_image_tk = ImageTk.PhotoImage(background_image)
+
         self.master = master
-        self.master.title("Path Drawing")
+        self.master.title("MEANS")
+        #self.master.iconbitmap("means_logo.ico")
+
+        self.label = ctk.CTkLabel(self.master, text="Copyright © MEANS 2023 All Rights Reserved")
+
+        self.label.place(relx=1.0, rely=1.0, anchor="se", x=-15, y=0)
 
         self.sidebar_frame = ctk.CTkFrame(self.master, width=650, height=450, corner_radius=7)
         self.sidebar_frame.pack(side=tk.LEFT, padx=10, pady=10)
@@ -50,16 +61,37 @@ class FractalDrawer:
         self.visual_canvas = ctk.CTkCanvas(self.sidebar_frame, bg="white", width=650, height=450, highlightthickness=0)
         self.visual_canvas.pack(side=tk.BOTTOM, padx=10, pady=(2,10))
 
-        v = tk.StringVar()
-        v.set(2)
+        self.ruler_length = 150  # Length of the ruler in pixels
+
+        self.draw_ruler()
+
+        self.visual_canvas.create_image(0, 0, image=background_image_tk)
+        self.canvas.create_image(0, 0, image=background_image_tk)
+
+        self.draw_grid()
+
+        self.v = tk.IntVar()
+        self.v.set(2)
+
+        self.sim_step_gui = 0.01
+
+        self.sim_step_label = ctk.CTkLabel(self.sidebar_frame2, text="Simulation Precision", font=ctk.CTkFont(size=14))
+        self.sim_step_label.pack(side=tk.TOP, padx=10, pady=(2, 2))
+
+        sim_step_var = tk.StringVar()
+        sim_step_var.set("Medium")
+
+        ctk.CTkRadioButton(self.sidebar_frame2, text="Low", variable=sim_step_var, value="Low", command=self.update_sim_step).pack(pady=(10, 0))
+        ctk.CTkRadioButton(self.sidebar_frame2, text="Medium", variable=sim_step_var, value="Medium", command=self.update_sim_step).pack()
+        ctk.CTkRadioButton(self.sidebar_frame2, text="High", variable=sim_step_var, value="High", command=self.update_sim_step).pack()
 
         # yazı
         self.vis_label = ctk.CTkLabel(self.sidebar_frame2, text="Corner Smoothing Degree", font=ctk.CTkFont(size=14))
         self.vis_label.pack(side=tk.TOP, padx=10, pady=(2,2))
 
-        ctk.CTkRadioButton(self.sidebar_frame2, text="Low", variable=v, value=1).pack(pady=(10,0))
-        ctk.CTkRadioButton(self.sidebar_frame2, text="Medium", variable=v, value=2).pack()
-        ctk.CTkRadioButton(self.sidebar_frame2, text="High", variable=v, value=3).pack()
+        ctk.CTkRadioButton(self.sidebar_frame2, text="Low", variable=self.v, value=1, command=self.update_parameters).pack(pady=(10,0))
+        ctk.CTkRadioButton(self.sidebar_frame2, text="Medium", variable=self.v, value=2, command=self.update_parameters).pack()
+        ctk.CTkRadioButton(self.sidebar_frame2, text="High", variable=self.v, value=3, command=self.update_parameters).pack()
 
         # Set up send path button
         self.send_button = ctk.CTkButton(self.sidebar_frame2, text="Send the path", command=self.show_popup)
@@ -77,7 +109,6 @@ class FractalDrawer:
         self.clear_button = ctk.CTkButton(self.sidebar_frame2, text="Clear", command=self.clear_canvas)
         self.clear_button.pack(side=tk.TOP, padx=10, pady=10)
 
-
         # List to store path coordinates
         self.sampling_active = False
         self.path = []
@@ -91,7 +122,76 @@ class FractalDrawer:
         self.max_deviation = 30
         self.max_iteration = 40
 
-        self.pltcanvas = None
+        fig = Figure(figsize = (5, 5), dpi = 100)
+        # adding the subplot
+        plot1 = fig.add_subplot(111)
+        plot1.axis('off')
+        self.pltcanvas = FigureCanvasTkAgg(fig, master = self.sidebar_frame3)
+        self.pltcanvas.draw()
+        # placing the canvas on the Tkinter window
+        self.pltcanvas.get_tk_widget().pack()
+        # creating the Matplotlib toolbar
+        toolbar = NavigationToolbar2Tk(self.pltcanvas, self.sidebar_frame3)
+        toolbar.update()
+        # placing the toolbar on the Tkinter window
+        self.pltcanvas.get_tk_widget().pack()
+
+    def update_parameters(self):
+        selection = self.v.get()
+        if selection == 1:  # Low
+            self.max_deviation = 60
+            self.max_iteration = 30
+        elif selection == 2:  # Medium
+            self.max_deviation = 30
+            self.max_iteration = 40
+        elif selection == 3:  # High
+            self.max_deviation = 15
+            self.max_iteration = 80
+
+    def update_sim_step(self):
+        selection = self.sim_step_var.get()
+        if selection == "Low":
+            self.sim_step_gui = 0.015
+        elif selection == "Medium":
+            self.sim_step_gui = 0.01
+        elif selection == "High":
+            self.sim_step_gui = 0.005
+
+    def draw_grid(self):
+        grid_size = 50  # Size of each grid square
+
+        for x in range(0, 650, grid_size):
+            self.canvas.create_line(x, 0, x, 450, fill="gray")
+
+        for y in range(0, 450, grid_size):
+            self.canvas.create_line(0, y, 650, y, fill="gray")
+
+
+    def draw_ruler(self):
+        x0 = 50  # X-coordinate of the ruler's starting point
+        y0 = 440  # Y-coordinate of the ruler's starting point
+        x1 = x0 + self.ruler_length  # X-coordinate of the ruler's ending point
+        y1 = y0  # Y-coordinate of the ruler's ending point
+
+        line_width = 3  # Width of the ruler line
+        marking_length = 8  # Length of the ruler markings
+        pixel_spacing = 150  # Spacing between ruler markings
+        label_spacing = 150  # Spacing between ruler labels
+
+        self.canvas.create_line(x0, y0, x1, y1, fill="black", width=line_width)
+
+        for i in range(0, self.ruler_length + 1, pixel_spacing):
+            x = x0 + i
+            y_top = y0 - marking_length
+            y_bottom = y0 + marking_length
+            self.canvas.create_line(x, y_top, x, y_bottom, fill="black", width=line_width)
+
+        for i in range(0, self.ruler_length + 1, label_spacing):
+            x = x0 + i
+            y = y0 - marking_length - 10
+        
+        self.canvas.create_text(125, y-5, text="1 m", anchor=tk.N, fill="black")
+
 
     def track_path(self, event):
         # Start the timer if it's not already running
@@ -111,14 +211,26 @@ class FractalDrawer:
         # yazı
         self.label = ctk.CTkLabel(self.sidebar_frame3, text="Actual Path to be Followed (in meters)", font=ctk.CTkFont(size=16, weight="bold"))
         self.label.pack(side=tk.TOP, padx=20, pady=(2,2))
-        self.tim = perform_simulation(self.path)
+        self.tim, exceeded = perform_simulation(self.path, self.sim_step_gui)
+        
+        if exceeded:
+            messagebox.showinfo("Warning", "Due to stability issues, the drawn path was shortened.")            
+        
         # the figure that will contain the plot
         fig = Figure(figsize = (5, 5), dpi = 100)
         # adding the subplot
         plot1 = fig.add_subplot(111)
-        x = np.load("./pos_arr_x.npy")*0.005
-        y = np.load("./pos_arr_y.npy")*0.005
+        x = np.load("./pos_arr_x.npy")*(2/3)*0.01
+        y = np.load("./pos_arr_y.npy")*(2/3)*0.01
         plot1.plot(x, -y, "-gD")
+
+        x_min, x_max = 0, 4.33
+        y_min, y_max = -3, 0
+
+        plot1.set_xlim(x_min, x_max)
+        plot1.set_ylim(y_min, y_max)
+        plot1.grid(True)
+
         # creating the Tkinter canvas
         # containing the Matplotlib figure
         self.pltcanvas = FigureCanvasTkAgg(fig, master = self.sidebar_frame3)
@@ -151,9 +263,9 @@ class FractalDrawer:
 
     def show_popup(self):
         # Show a popup information window with the message "Path is sent!"
-        send_array()
-        messagebox.showinfo("Information", f"Path is completely sent! Expected completion duration: {self.tim} seconds!")
-
+        success = send_array()
+        if success:
+            messagebox.showinfo("Information", "Path is completely sent! Expected completion duration: {:.2f} seconds!".format(self.tim))
 
     def print_path(self):
         # Print the path coordinates to console
@@ -170,6 +282,8 @@ class FractalDrawer:
                 self.pltcanvas.get_tk_widget().delete(item)
             self.pltcanvas = None
         self.path.clear()
+        self.draw_grid()
+        self.draw_ruler()
 
     def update_angle(self, angle):
         # Update angle variable from slider and input box

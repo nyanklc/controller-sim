@@ -3,10 +3,10 @@
 
 ///////////////////////////////////////
 // MOTOR_1 --> LEFT
-uint8_t MOTOR1_1 = 8;
-uint8_t MOTOR1_2 = 9;
-uint8_t MOTOR1_3 = 10;
-uint8_t MOTOR1_4 = 11;
+uint8_t MOTOR1_1 = 10;
+uint8_t MOTOR1_2 = 11;
+uint8_t MOTOR1_3 = 8;
+uint8_t MOTOR1_4 = 9;
 
 uint8_t MOTOR2_1 = 7;
 uint8_t MOTOR2_2 = 6;
@@ -216,6 +216,12 @@ void setup()
   Serial.println("millis");
   millis_begin = millis();
 
+//  while (1)
+//  {
+//    MotorLeft.step(600);
+//    MotorRight.step(600);
+//    delay(10000);
+//  }
 }
 
 void loop()
